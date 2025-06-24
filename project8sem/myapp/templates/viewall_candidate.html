@@ -1,0 +1,41 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}View All Candidate{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/view_user.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <h1>View All Candidate</h1>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                
+                <th>Party</th>
+                <th>Role </th>
+               
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td data-label="#"> {{ forloop.counter }}</td>
+                <td data-label="Full Name">{{ user.first_name }} {{ user.middle_name }} {{ user.last_name }}</td>
+                <td data-label="Email">{{ user.email }}</td>
+                
+                <td data-label="Party">{{ user.get_political_party_display }}</td>
+                <td data-label="Role"> {{ user.get_role_display }}</td>
+                
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

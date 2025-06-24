@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Here</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'myapp/css/nav.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/vote.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+</head>
+<body>
+    {% if messages %}
+        <div id="message-container">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <header>
+        <nav>
+            <div class="nav-left">
+                <div class="menu-icon" onclick="openNav()">&#9776;</div>
+                <div class="logo"><img src="{% static 'myapp/images/logo.jpg' %}" alt="Logo" class="circular-logo"></div>
+            </div>
+            <div class="nav-center" id="navLinks">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'candidates' %}">Candidates</a>
+                <a href="{% url 'notices' %}">Notices</a>
+                <a href="{% url 'vote' %}">Vote Here</a>
+                <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+                <a href="{% url 'contact' %}">Contact</a>
+            </div>
+            <div class="nav-right">
+                {% if user_full_name %}
+                <span class="user-full-name">{{ user_full_name }}</span>
+                {% if user_profile_picture %}
+                    <img src="{{ user_profile_picture }}" alt="Profile Picture" class="profiles-picture" onclick="toggleDropdown()">
+                {% else %}
+                <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture" onclick="toggleDropdown()">
+                {% endif %}
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="{% url 'edit_profile' %}" class="profile-items">Edit Profile</a>
+                    <a href="{% url 'user_logout' %}" class="profile-items">Logout</a>
+                </div>
+            {% else %}
+                <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
+            {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <div class="side-menu" id="sideMenu">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="sideNavLinks">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'candidates' %}">Candidates</a>
+            <a href="{% url 'notices' %}">Notices</a>
+            <a href="{% url 'vote' %}">Vote Here</a>
+            <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+            <a href="{% url 'contact' %}">Contact</a>
+        </div>
+    </div>
+
+    <main>
+        <section class="vote-section">
+            <h1>Vote Here</h1>
+            <form method="post" action="{% url 'submit_vote' %} ">
+                {% csrf_token %}
+                <div class="vote-container">
+
+                    {% if votestatus %}
+                    <section class="verification-message">
+                        <div class="kyc-message">
+                            <span><h3>Your have already Vote the Candidates.</h3></span><br>
+                           
+                        </div>
+                        <div>
+                            <span><h4>Please Wait for the Result</h4>
+                        </div>
+                    </section>
+                    {% elif kycreject %}
+                        <section class="verification-message">
+                            <div class="kyc-message">
+                                <span><h3>Your KYC has been Rejected. Please resubmit your KYC.</h3></span>
+                            </div>
+                            <div class="kyc-button">
+                                <a href="{% url 'update_kyc' %}" class="submit-kyc">Update KYC</a>
+                            </div>
+                        </section>
+                    {% elif kycrequest %}
+                        <section class="verification-message">
+                            <div class="kyc-message">
+                                <span><h3>Your KYC verification process is in progress.</h3></span>
+                            </div>
+                        </section>
+                    {% elif not user_verified %}
+                        <section class="verification-message">
+                            <div class="kyc-message">
+                                <span><h3>To vote, please verify your KYC first.</h3></span>
+                            </div>
+                            <div class="kyc-button">
+                                <a href="{% url 'verify_kyc' %}" class="submit-kyc">Submit KYC</a>
+                            </div>
+                        </section>
+                    {% else %}
+                        <h1>Vote Here</h1>
+                        <div class="vote-group">
+                            <h2>Vote for Member of Parliament</h2>
+                            <div class="candidate-list" id="mp-candidates">
+                                {% for candidate in mp_candidates %}
+                                    <div class="candidate-card">
+                                        <img src="{{ candidate.profile_picture.url }}" alt="Profile Picture">
+                                        <div class="details">
+                                            <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+                                            <p><strong>Party: </strong>{{ candidate.political_party }}</p>
+                                            <p><strong>Position: </strong>{{ candidate.role }}</p>
+                                            <div class="radio-button">
+                                                <input type="radio" name="mp_vote" value="{{ candidate.email }}"><strong>Vote</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="vote-group">
+                            <h2>Vote for Mayor</h2>
+                            <div class="candidate-list" id="mayor-candidates">
+                                {% for candidate in mayor_candidates %}
+                                    <div class="candidate-card">
+                                        <img src="{{ candidate.profile_picture.url }}" alt="Profile Picture">
+                                        <div class="details">
+                                            <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+                                            <p><strong>Party: </strong>{{ candidate.political_party }}</p>
+                                            <p><strong>Position: </strong>{{ candidate.role }}</p>
+                                            <div class="radio-button">
+                                                <input type="radio" name="mayor_vote" value="{{ candidate.email }}"><strong>Vote</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="vote-group">
+                            <h2>Vote for Deputy Mayor</h2>
+                            <div class="candidate-list" id="deputy-mayor-candidates">
+                                {% for candidate in deputy_mayor_candidates %}
+                                    <div class="candidate-card">
+                                        <img src="{{ candidate.profile_picture.url }}" alt="Profile Picture">
+                                        <div class="details">
+                                            <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+                                            <p><strong>Party: </strong>{{ candidate.political_party }}</p>
+                                            <p><strong>Position: </strong>{{ candidate.role }}</p>
+                                            <div class="radio-button">
+                                                <input type="radio" name="deputy_mayor_vote" value="{{ candidate.email }}"><strong>Vote</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="vote-group">
+                            <h2>Vote for Ward Chairperson</h2>
+                            <div class="candidate-list" id="ward-candidate">
+                                {% for candidate in ward_candidate %}
+                                    <div class="candidate-card">
+                                        <img src="{{ candidate.profile_picture.url }}" alt="Profile Picture">
+                                        <div class="details">
+                                            <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+                                            <p><strong>Party: </strong>{{ candidate.political_party }}</p>
+                                            <p><strong>Position: </strong>{{ candidate.role }}</p>
+                                            <div class="radio-button">
+                                                <input type="radio" name="ward_chairperson_vote" value="{{ candidate.email}}"><strong>Vote</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <button class="next-btn" type="submit">Submit Vote</button>
+                    {% endif %}
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>COMPANY</h3>
+                <a href="#">Home</a>
+                <a href="#">How It Works</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <div class="footer-section">
+                <h3>LEGAL</h3>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+            <div class="footer-section">
+                <h3>ABOUT US</h3>
+                <a href="#">Testimonials</a>
+                <a href="#">Partners</a>
+                <a href="#">Support Us</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <a href="mailto:abcd@gmail.com">abcd@gmail.com</a>
+                <p>97789945551</p>
+            </div>
+        </div>
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fas fa-peace"></i></a>
+            <a href="#"><i class="fab fa-linkedin"></i></a>
+        </div>
+        <p>&copy; 2024 OVC, Inc. All Rights Reserved.</p>
+    </footer>
+
+    <!-- JavaScript for navigation and popup -->
+    <script src="{% static 'myapp/js/profilesdropdown.js' %}"></script>
+    <script src="{% static 'myapp/js/navs.js' %}"></script>
+    <script src="{% static 'myapp/js/alert.js' %}"></script>
+</body>
+</html>

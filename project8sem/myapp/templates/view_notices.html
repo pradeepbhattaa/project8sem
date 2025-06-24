@@ -1,0 +1,40 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}View Notices{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/view_user.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <h1>View All Notices</h1>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Notice id</th>
+                <th>Notice header</th>
+                <th> Image</th>
+                
+               
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for notice in notices %}
+            <tr>
+                <td data-label="Notice Id"> {{ notice.id }}</td>
+                <td data-label="Notice Header">{{  notice.notice_header }}</td>
+                <td data-label="Notice Img"><img src="{{ notice.notice_img.url }}"  class="notice_img"> </td>
+                
+               
+                
+
+                
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

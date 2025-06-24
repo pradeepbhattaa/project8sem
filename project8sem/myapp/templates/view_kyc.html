@@ -1,0 +1,121 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}KYC Details{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/view_kyc.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/zoom.css' %}">
+    <script src="{% static 'myapp/js/alert.js' %}"> </script>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+<div id="message-container">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+    <div class="headertitle">
+    <h2>KYC Details for {{ kyc_registration.email }}</h2>
+
+    </div>
+    
+    <div class="kyc-card">
+        <div class="kyc-photo zoom-container">
+            <img src="{{ kyc_registration.photo_front.url }}" alt="Photo Front" class="kyc-photo-front">
+            <div class="zoom-overlay"></div>
+        </div>
+        <div class="kyc-details">
+            <div class="kyc-field">
+                <span class="kyc-label">Email:</span>
+                <span class="kyc-value">{{ kyc_registration.email }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Phone Number:</span>
+                <span class="kyc-value">{{ user_profile.phone_number }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">First Name:</span>
+                <span class="kyc-value">{{ user_profile.first_name }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Middle Name:</span>
+                <span class="kyc-value">{{ user_profile.middle_name }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Last Name:</span>
+                <span class="kyc-value">{{ user_profile.last_name }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Date of Birth:</span>
+                <span class="kyc-value">{{ user_profile.dob }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Citizenship Number:</span>
+                <span class="kyc-value">{{ kyc_registration.citizenship_number }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Voter ID:</span>
+                <span class="kyc-value">{{ kyc_registration.voter_id }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Gender:</span>
+                <span class="kyc-value">{{ kyc_registration.gender }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Country:</span>
+                <span class="kyc-value">{{ kyc_registration.country }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Province:</span>
+                <span class="kyc-value">{{ kyc_registration.province }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">District:</span>
+                <span class="kyc-value">{{ kyc_registration.district }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Municipality:</span>
+                <span class="kyc-value">{{ kyc_registration.municipality }}</span>
+            </div>
+            <div class="kyc-field">
+                <span class="kyc-label">Ward No:</span>
+                <span class="kyc-value">{{ kyc_registration.ward_no }}</span>
+            </div>
+            <div class="kyc-field zoom-container">
+                <span class="kyc-label">Voter ID Photo:</span>
+                <img src="{{ kyc_registration.photo_voter.url }}" alt="Voter ID Photo">
+                <div class="zoom-overlay"></div>
+            </div>
+            <div class="kyc-field zoom-container">
+                <span class="kyc-label">Citizenship Photo Front:</span>
+                <img src="{{ kyc_registration.photo_citizenship_front.url }}" alt="Citizenship Photo Front">
+                <div class="zoom-overlay"></div>
+            </div>
+            <div class="kyc-field zoom-container">
+                <span class="kyc-label">Citizenship Photo Back:</span>
+                <img src="{{ kyc_registration.photo_citizenship_back.url }}" alt="Citizenship Photo Back">
+                <div class="zoom-overlay"></div>
+            </div>
+
+            <div class="kyc-actions">
+                <a href="{% url 'accept_kyc' request_id=kyc_request.id %}" class="kyc-button accept">Accept KYC</a>
+                <a href="{% url 'reject_kyc' request_id=kyc_request.id %}" class="kyc-button reject">Reject KYC</a>
+                <a class="kyc-button accept">Whitelisting User</a>
+            </div>
+
+
+        </div>
+    </div>
+    </div>
+
+{% endblock %}

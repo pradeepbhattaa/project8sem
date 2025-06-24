@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/main-content.css' %}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- Display alert messages -->
+{% if messages %}
+<div id="message-container">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="header">
+    <div class="logo">
+       <p> logo </p>
+    </div>
+    <div class="title-header">
+        <h1 class="admin-header">Admin Dashboard</h1>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <ul class="nav-links">
+            <li> <a href="{% url 'base'%}"> Home  </a></li>
+            <li>
+                <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                <ul id="user-submenu" class="submenu">
+                    <li><a href="{% url 'adduser' %}">Add User</a></li>
+                    <li><a href="{% url 'edituser' %}">Edit User</a></li>
+                    
+                    <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                    <li><a href="{% url 'view_users' %}">View Users</a></li>
+                    
+                </ul>
+            </li>
+            <li>
+                <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                <ul id="notice-submenu" class="submenu">
+                    <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
+                    <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
+                    <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
+                    <li><a href="{% url 'view_notices' %}">View Notices</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                <ul id="candidate-submenu" class="submenu">
+                    <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
+                    <li><a href="{% url 'editcandidate' %}">Edit Candidate</a></li>
+                    <li><a href="{% url 'deletecandidate' %}">Delete Candidate</a></li>
+                    <li><a href="{% url 'viewcandidate' %}">View Candidates</a></li>
+                    <li><a href="{% url 'viewall_candidate' %}">View All  Candidates</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
+                <ul id="kyc-submenu" class="submenu">
+                    <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
+                    <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
+                    <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
+
+                </ul>
+            </li>
+            
+
+            <li><a href="{% url 'adminlogout' %}">Logout</a></li>
+            <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+
+        <div class="count-number">
+            <div class="count-items">
+                <h4>Total Users: {{ total_users }}</h4>
+            </div>
+            <div class="count-items">
+                <h4>Total Candidates: {{ total_candidates }}</h4>
+            </div>
+            <div class="count-items">
+                <a href="{% url 'view_kycrequest' %}"<h4>KYC Requests: {{ kyc_requests }}</h4></a>
+            </div>
+            <div class="count-items">
+                <h4>KYC Verified: {{ kyc_verified }}</h4>
+            </div>
+
+            <div class="count-items">
+                <a href=""><h4>Start Voting</h4></a>
+            </div>
+            <div class="count-items">
+
+                <a href=""><h4>End Voting</h4></a>
+                
+            </div>
+        </div>
+
+        <!-- Conditional rendering for the graph -->
+        {% if graph %}
+        <div class="graph-container">
+            <img src="data:image/png;base64,{{ graph }}" alt="User Age Distribution Graph">
+        </div>
+        {% else %}
+        <div class="graph-container">
+            <p>No graph available</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% block adduserjs %}
+{% endblock %}
+
+<script src="{% static 'myapp/js/dashboard.js' %}"></script>
+<script src="{% static 'myapp/js/alert.js' %}"></script>
+</body>
+</html>

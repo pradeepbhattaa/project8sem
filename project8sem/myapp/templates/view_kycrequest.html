@@ -1,0 +1,59 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}KYC Request{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/view_user.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    <script src="{% static 'myapp/js/alert.js' %}"> </script>
+
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div id="message-container">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+    <h1>View All KYC request</h1>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Phone number</th>
+                <th>Citizenship No.</th>
+                <th>VoterId No.</th>
+                <th>Action </th>
+                
+               
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in requests %}
+            <tr>
+                <td data-label="Email"> {{ request.email }}</td>
+                <td data-label="Phone Number"> {{ request.phone_number }}</td>
+                <td data-label="Citizenship No.">{{  request.citizenship_number }}</td>
+                <td data-label="VoterId No.">{{  request.voter_id }}</td>
+                <td data-label="Action">
+                    <a href="{% url 'view_kyc' request.id %}">View KYC Form</a>
+                </td>
+                
+               
+                
+
+                
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
