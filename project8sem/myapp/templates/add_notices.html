@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Notices</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/add_candidate.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    
+</head>
+<body>
+
+    <!-- Display alert messages -->
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="header">
+        <div class="logo">
+            <p>Hello</p>
+        </div>
+        <div class="title-header">
+            <h1 class="admin-header">Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul class="nav-links">
+                <li> <a href="{% url 'base'%}"> Home  </a></li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                    <ul id="user-submenu" class="submenu">
+                        <li><a href="{% url 'adduser' %}">Add User</a></li>
+                        <li><a href="{% url 'edituser' %}">Edit User</a></li>
+                        
+                        <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                        <li><a href="{% url 'view_users' %}">View Users</a></li>
+                        
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                    <ul id="notice-submenu" class="submenu">
+                        <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
+                        <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
+                        <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
+                        <li><a href="{% url 'view_notices' %}">View Notices</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                    <ul id="candidate-submenu" class="submenu">
+                        <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
+                        <li><a href="{% url 'editcandidate' %}">Edit Candidate</a></li>
+                        <li><a href="{% url 'deletecandidate' %}">Delete Candidate</a></li>
+                        <li><a href="{% url 'viewcandidate' %}">View Candidates</a></li>
+                        <li><a href="{% url 'viewall_candidate' %}">View All  Candidates</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
+                    <ul id="kyc-submenu" class="submenu">
+                        <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
+                        <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
+                        <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
+
+                    </ul>
+                </li>
+                
+
+                <li><a href="{% url 'adminlogout' %}">Logout</a></li>
+                <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="form-container">
+                <form id="responsiveForm" action="{% url 'add_notices'%}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                              <h1> Add Notices</h1>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label for="municipality">Notices Header</label>
+                        <input type="text" id="municipality" name="notice_header" required>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="pp_photo">Notice img</label>
+                        <input type="file" id="pp_photo" name="notice_img" required>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label for="ward">Notices Description</label>
+                        <input type="text" id="ward" name="notice_description" required>
+                    </div>
+
+                   
+
+                    <div class="form-group">
+                        <button type="submit">Add Notices</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'myapp/js/dashboard.js' %}"></script>
+    <script src="{% static 'myapp/js/alert.js' %}"></script>
+</body>
+</html>
