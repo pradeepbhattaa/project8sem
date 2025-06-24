@@ -34,3 +34,9 @@ def login(request):
             messages.error(request, 'Invalid email or password.')
 
     return render(request, 'myapp/admin_login.html')
+
+
+def base(request):
+    if not request.session.get('admin_verified'):
+        return redirect('login')  # Redirect to verify_email if page_a is not completed
+    return render(request,'myapp/base.html')
