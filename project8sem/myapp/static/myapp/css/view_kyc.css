@@ -1,0 +1,192 @@
+/* view_kyc.css */
+
+.kyc-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.kyc-photo {
+    position: relative;
+    width: 300px;
+    max-height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.kyc-photo img {
+    width: 300px;
+
+    height: 300px;
+    border-radius: 8px;
+}
+
+.headertitle{
+    display: flex;
+    justify-content: center;
+
+
+}
+
+.kyc-details {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.kyc-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.kyc-label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #333;
+}
+
+.kyc-value {
+    flex-grow: 1;
+    text-align: right;
+    color: #555;
+}
+
+.kyc-actions {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+
+.kyc-actions a{
+    text-decoration: none;
+
+}
+
+.kyc-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.kyc-button.accept {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.kyc-button.accept:hover {
+    background-color: #044608;
+}
+
+.kyc-button.reject {
+    background-color: #f44336;
+    color: white;
+}
+
+.kyc-button.reject:hover {
+    background-color: #780606;
+}
+
+@media (max-width: 600px) {
+    .kyc-card {
+        padding: 10px;
+    }
+    
+    .kyc-photo {
+        margin-bottom: 10px;
+    }
+
+    .kyc-field {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 5px;
+    }
+
+    .kyc-value {
+        text-align: left;
+        margin-top: 5px;
+    }
+
+    .kyc-actions {
+        flex-direction: column;
+    }
+
+    .kyc-button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .kyc-button:last-child {
+        margin-bottom: 0;
+    }
+}
+
+
+@media (max-width: 946px) {
+
+    .headertitle{
+        font-size: 15px;
+
+    }
+
+}
+
+
+@media (max-width: 555px) {
+
+    .headertitle{
+        font-size: 12px;
+        
+    }
+
+}
+
+
+/* zoom.css */
+
+.zoom-container {
+    position: relative;
+    cursor: pointer;
+}
+
+.zoom-container img {
+    height: 300px;
+    width: 300px;
+    transition: transform 0.2s ease;
+}
+
+.zoom-container:hover img {
+    transform: scale(1.2);
+}
+
+.zoom-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.zoom-container:hover .zoom-overlay {
+    opacity: 1;
+}

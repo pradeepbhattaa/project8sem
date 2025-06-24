@@ -1,0 +1,126 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins';
+}
+
+body {
+    color: green;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 6px;
+    border: 2px solid green;
+    position: relative;
+}
+
+.container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin: 0.4rem 0;
+}
+
+.input-box label {
+    margin-bottom: 5px;
+}
+
+.input-box input {
+    height: 3rem;
+    font-size: 1rem;
+    text-align: center;
+    padding: 0 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: green;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8rem;
+    display: none;
+}
+
+.optional {
+    font-size: 12px;
+    color: #888;
+}
+
+.next-btn  {
+    height: 3rem;
+    color: white;
+    font-weight: 600;
+    font-size: 20px;
+    margin-top: 0.4rem 0;
+    background-color: rgb(13, 186, 13);
+    border-style: none;
+    text-align: center;
+}
+
+.back-btn{
+   color: green;
+}
+
+.next-btn:hover {
+    background-color: rgb(4, 91, 4);
+    color: white;
+    transition: 0.5s;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.section {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+.step-indicator {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.step-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: gray;
+    margin: 0 5px;
+    display: inline-block;
+}
+
+.step-circle.active {
+    background-color: green;
+}
+
+@media screen and (max-width: 500px) {
+    .container {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .register, .reset-password {
+        font-size: 13px;
+    }
+}
