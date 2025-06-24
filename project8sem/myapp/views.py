@@ -4,7 +4,9 @@ from django.shortcuts import render, redirect,get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import login as auth_login
 from .models import Test
+from .models import UserRegistration
 
+from .models import UserProfile
 # Create your views here.
 def login(request):
     if request.method == 'POST':
