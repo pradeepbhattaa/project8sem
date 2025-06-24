@@ -1,0 +1,341 @@
+<!-- myapp/templates/myapp/add_user.html -->
+
+<!-- myapp/templates/myapp/add_user.html -->
+{% extends "myapp/base.html" %}
+
+{% block title %}Add User{% endblock %}
+
+{% block head %}
+     {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/add_user.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.input-box');
+            
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent form submission
+                
+                // Validate Name
+                const isValidFirstName = validateName('first-name', 'first-name-error');
+        
+                // Validate Middle Name (optional)
+                const isValidMiddleName = validateMiddleName('middle-name', 'middle-name-error');
+        
+                // Validate Last Name
+                const isValidLastName = validateName('last-name', 'last-name-error');
+        
+                // Validate Date of Birth
+                const isValidDOB = validateDOB('dob', 'dob-error');
+        
+                // Validate Phone Number
+                const isValidPhoneNumber = validatePhoneNumber('phone_number', 'phone-error');
+        
+                // Validate Email
+                const isValidEmail = validateEmail('email', 'email-error');
+        
+                // Validate Password
+                const isValidPassword = validatePassword('password', 'password-error');
+        
+                // Validate Confirm Password
+                const isValidConfirmPassword = validateConfirmPassword('password', 'confirm_password', 'confirm-password-error');
+        
+                // Check if all fields are valid
+                if (isValidFirstName && isValidMiddleName && isValidLastName && isValidDOB && isValidPhoneNumber && isValidEmail && isValidPassword && isValidConfirmPassword) {
+                    // If all validations pass, you can submit the form
+                    form.submit();
+                } else {
+                    // If any validation fails, the form will not submit
+                    console.log('Form validation failed');
+                }
+            });
+        });
+        
+        // Validate Name Field
+        function validateName(inputFieldId, errorMessageId) {
+            const inputField = document.getElementById(inputFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const inputValue = inputField.value.trim();
+            const nameRegex = /^[a-zA-Z]+$/;
+        
+            if (inputValue === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (!nameRegex.test(inputValue)) {
+                errorMessage.textContent = 'Please enter a valid name';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate Middle Name
+        function validateMiddleName(inputFieldId, errorMessageId) {
+            const inputField = document.getElementById(inputFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const inputValue = inputField.value.trim();
+            const nameRegex = /^[a-zA-Z]*$/;
+        
+            if (inputValue === '') {
+                // Middle name is optional, so no validation required if empty
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            } else if (!nameRegex.test(inputValue)) {
+                errorMessage.textContent = 'Please enter a valid middle name';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate Date of Birth
+        function validateDOB(dobFieldId, errorMessageId) {
+            const dobField = document.getElementById(dobFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const dobValue = dobField.value;
+            if (!dobValue) {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+            const dobDate = new Date(dobValue);
+            const today = new Date();
+            const minAge = 18;
+            const minDateOfBirth = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate());
+        
+            if (dobDate > minDateOfBirth) {
+                errorMessage.textContent = 'You must be at least 18 years old';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate Phone Number
+        function validatePhoneNumber(phoneNumberFieldId, errorMessageId) {
+            const phoneNumberField = document.getElementById(phoneNumberFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const phoneNumber = phoneNumberField.value.trim();
+        
+            if (phoneNumber === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (phoneNumber.length !== 10 || isNaN(phoneNumber)) {
+                errorMessage.textContent = 'Phone number must be exactly 10 digits';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate Email
+        function validateEmail(emailFieldId, errorMessageId) {
+            const emailField = document.getElementById(emailFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const emailValue = emailField.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+            if (emailValue === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (!emailRegex.test(emailValue)) {
+                errorMessage.textContent = 'Please enter a valid email address';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate Password
+        function validatePassword(passwordFieldId, errorMessageId) {
+            const passwordField = document.getElementById(passwordFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const password = passwordField.value.trim();
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        
+            if (password === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (!passwordRegex.test(password)) {
+                errorMessage.textContent = 'Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, one number, and one special character';
+                errorMessage
+                .style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+        // Validate Confirm Password
+        function validateConfirmPassword(passwordFieldId, confirmPasswordFieldId, errorMessageId) {
+            const passwordField = document.getElementById(passwordFieldId);
+            const confirmPasswordField = document.getElementById(confirmPasswordFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const password = passwordField.value.trim();
+            const confirmPassword = confirmPasswordField.value.trim();
+        
+            if (confirmPassword === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (confirmPassword !== password) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+        
+
+    </script>
+{% endblock %}
+
+
+
+
+
+{% block content %}
+
+{% if messages %}
+<div id="message-container">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+<div class="add_user-container" >
+
+    <div class="adduser_inputitems">
+
+        <h1> Add User <h1>
+
+    </div>
+
+    <form class="input-box" method="post"  action="{% url 'adduser'%}">
+        {% csrf_token %}
+
+
+        <div class="adduser_inputitems">
+
+                    <label for="first-name">First Name</label>
+                    <span class="error-message" id="first-name-error"></span>
+                    <input type="text" id="first-name" name="first_name" required>
+    
+        </div>
+
+
+        <div class="adduser_inputitems">
+            <div class="middle-label">
+                <label for="middle-name">Middle Name</label>
+                <label for="middle-name" class="optional">*Optional</label>
+            </div>
+            <span class="error-message" id="middle-name-error"></span>
+            <input type="text" id="middle-name" name="middle_name">
+         </div>
+
+
+
+
+         <div class="adduser_inputitems">
+
+                     <label for="last-name">Last Name</label>
+                    <span class="error-message" id="last-name-error"></span>
+                    <input type="text" id="last-name" name="last_name" required>
+         </div>
+
+         <div class="adduser_inputitems">
+
+                    <label for="dob">Date of Birth</label>
+                    <span class="error-message" id="dob-error"></span>
+                    <input type="date" id="dob" name="dob" required>
+         </div>
+
+         <div class="adduser_inputitems">
+
+                   <label for="phone_number">Phone Number</label>
+                    <span class="error-message" id="phone-error"></span>
+                    <input type="number" id="phone_number" name="phonenumber" required>
+         </div>
+
+         <div class="adduser_inputitems">
+
+                     <label for="email">Email</label>
+                    <span class="error-message" id="email-error"></span>
+                    <input type="email" id="email" name="email" required>
+         </div>
+
+         <div class="adduser_inputitems">
+
+                   <label for="password">Password</label>
+                    <span class="error-message" id="password-error"></span>
+                    <input type="password" id="password" name="password" required>
+         </div>
+
+         <div class="adduser_inputitems">
+
+                   <label for="confirm_password">Confirm Password</label>
+                    <span class="error-message" id="confirm-password-error"></span>
+                    <input type="password" id="confirm_password" name="cpassword" required>
+         </div>
+
+
+         
+        <button class="next-btn" type="submit">Add User</button>
+   
+
+
+
+
+
+    
+
+
+
+
+
+
+
+    </form>
+
+
+
+
+    
+
+      
+</div>
+
+{% endblock %}
