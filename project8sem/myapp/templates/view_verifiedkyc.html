@@ -1,0 +1,44 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}Verified KYC{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/view_user.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <h1>View All Verified Kyc</h1>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                
+                <th>Email</th>
+
+                <th> Verified By </th>
+
+                <th> Verified at </th>
+                
+
+               
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td data-label="#"> {{ forloop.counter }}</td>
+               
+                <td data-label="Email">{{ user.email }}</td>
+                
+                <td data-label="Verified By">{{ user.verified_by }}</td>
+                <td data-label="Verified at"> {{ user.verified_time }}</td>
+                
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

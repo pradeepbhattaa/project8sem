@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/add_candidate.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    
+</head>
+<body>
+
+    <!-- Display alert messages -->
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="header">
+        <div class="logo">
+            <p>logo</p>
+        </div>
+        <div class="title-header">
+            <h1 class="admin-header">Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul class="nav-links">
+                <li> <a href="{% url 'base'%}"> Home  </a></li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                    <ul id="user-submenu" class="submenu">
+                        <li><a href="{% url 'adduser' %}">Add User</a></li>
+                        <li><a href="{% url 'edituser' %}">Edit User</a></li>
+                        
+                        <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                        <li><a href="{% url 'view_users' %}">View Users</a></li>
+                        
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                    <ul id="notice-submenu" class="submenu">
+                        <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
+                        <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
+                        <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
+                        <li><a href="{% url 'view_notices' %}">View Notices</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                    <ul id="candidate-submenu" class="submenu">
+                        <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
+                        <li><a href="{% url 'editcandidate' %}">Edit Candidate</a></li>
+                        <li><a href="{% url 'deletecandidate' %}">Delete Candidate</a></li>
+                        <li><a href="{% url 'viewcandidate' %}">View Candidates</a></li>
+                        <li><a href="{% url 'viewall_candidate' %}">View All  Candidates</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
+                    <ul id="kyc-submenu" class="submenu">
+                        <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
+                        <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
+                        <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
+
+                    </ul>
+                </li>
+                
+
+                <li><a href="{% url 'adminlogout' %}">Logout</a></li>
+                <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="form-container">
+                <form id="responsiveForm" action="{% url 'addcandidate'%}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                              <h1> Add Candidate </h1>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name">First Name:</label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="middle_name">Middle Name:</label>
+                        <input type="text" id="middle_name" name="middle_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name:</label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dob">Date of Birth:</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Position:</label>
+                        <select id="role" name="role" required>
+                            <option value="" selected disabled>Select Role</option>
+                            <option value="MP">Member of Parliament</option>
+                            <option value="Mayor">Mayor</option>
+                            <option value="Deputy Mayor">Deputy Mayor</option>
+                            <option value="Ward Chairperson">Ward Chairperson</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="political_party">Political Party:</label>
+                        <select id="political_party" name="political_party" required>
+                            <option value="" selected disabled>Select Political Party</option>
+                            <option value="CPN-UML">CPN-UML</option>
+                            <option value="Nepali Congress">Nepali Congress</option>
+                            <option value="Maoist">Communist Party of Nepal (Maoist Centre)</option>
+                            <option value="Samajwadi">Samajwadi Party Nepal</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district">District:</label>
+                        <input type="text" id="district" name="district" required>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="municipality">Municipality:</label>
+                        <input type="text" id="municipality" name="municipality" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ward">Ward No.:</label>
+                        <input type="number" id="ward" name="ward" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pp_photo">PP Photo:</label>
+                        <input type="file" id="pp_photo" name="pp_photo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="front_citizenship">Front Citizenship Photo:</label>
+                        <input type="file" id="front_citizenship" name="front_citizenship" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="back_citizenship">Back Citizenship Photo:</label>
+                        <input type="file" id="back_citizenship" name="back_citizenship" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'myapp/js/dashboard.js' %}"></script>
+    <script src="{% static 'myapp/js/alert.js' %}"></script>
+</body>
+</html>

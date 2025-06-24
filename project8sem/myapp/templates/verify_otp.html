@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/verify_email.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+</head>
+<body>
+
+             <!-- Display alert messages -->
+ {% if messages %}
+ <div id="message-container">
+     {% for message in messages %}
+     <div class="alert {{ message.tags }}">
+         <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+         {{ message }}
+     </div>
+     {% endfor %}
+ </div>
+ {% endif %}
+
+    <div class="container">
+
+        <h1>Verify Email</h1>
+
+        
+            <p class="info">Please Enter Your OTP.</p>
+            
+        
+
+        <form class="input-box"  method="post" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            <div class="input-items">
+
+                <div class="otp-timer">
+
+                    <label for="Email">OTP </label>
+                    <span id="timer" class="otp"></span>
+
+
+
+                </div>
+
+
+
+                
+                <input type="number"  name ="otp" required maxlength="6">
+            </div>
+            <div class="input-items">
+                <button  type="Submit"  class="login-btn" >Next</button>
+            </div>
+        </form>
+
+        <p>        Didn't recieve code?      <a  class=" resend"href="">Resend</a>  </p>
+
+    </div>
+
+
+
+
+    <script src="{% static 'myapp/js/otp_verify.js' %}"></script>
+    <script src="{%static 'myapp/js/alert.js' %}"> </script>
+</body>
+</html>

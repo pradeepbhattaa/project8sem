@@ -1,0 +1,227 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}Edit Notices{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/edit_user.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    
+    <script>
+
+
+
+                       // Hide the alert box after 3 seconds
+                   setTimeout(function() {
+                        var alert = document.getElementById('message-container');
+                        if (alert) {
+                                   alert.style.display = 'none';
+                         }
+                    }, 5000);
+
+
+
+ 
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.input-box');
+            const addUserContainer2 = document.querySelector('.add_user-container2');
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent form submission
+                
+                // Validate Email
+                const isValidEmail = validateEmail('semail', 'email-error');
+                
+                // Check if all fields are valid
+                if (isValidEmail) {
+                    // If all validations pass, you can submit the form
+                    form.submit();
+                } else {
+                    // If any validation fails, the form will not submit
+                    console.log('Form validation failed');
+                }
+            });
+
+            document.querySelector('.update-user-form').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent form submission
+
+                const isValidFirstName = validateName('first-name', 'first-name-error');
+                const isValidMiddleName = validateName('middle-name', 'middle-name-error', true); // Optional
+                const isValidLastName = validateName('last-name', 'last-name-error');
+                const isValidDOB = validateDOB('dob', 'dob-error');
+                const isValidPhoneNumber = validatePhoneNumber('phone_number', 'phone-error');
+                const isValidEmail = validateEmail('email', 'email-error');
+                const isValidPassword = validatePassword('password', 'password-error');
+                const isValidConfirmPassword = validateConfirmPassword('password', 'confirm_password', 'confirm-password-error');
+
+                if (isValidFirstName && isValidMiddleName && isValidLastName && isValidDOB && isValidPhoneNumber && isValidEmail && isValidPassword && isValidConfirmPassword) {
+                    event.target.submit(); // If all validations pass, submit the form
+                } else {
+                    console.log('Form validation failed');
+                }
+            });
+        });
+
+        // Validate Name Field
+        function validateName(inputFieldId, errorMessageId, isOptional = false) {
+            const inputField = document.getElementById(inputFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const inputValue = inputField.value.trim();
+            const nameRegex = /^[a-zA-Z]+$/;
+
+            if (inputValue === '' && !isOptional) {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (!nameRegex.test(inputValue) && inputValue !== '') {
+                errorMessage.textContent = 'Please enter a valid name';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Validate Date of Birth
+        function validateDOB(dobFieldId, errorMessageId) {
+            const dobField = document.getElementById(dobFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const dobValue = dobField.value;
+            if (!dobValue) {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            }
+            const dobDate = new Date(dobValue);
+            const today = new Date();
+            const minAge = 18;
+            const minDateOfBirth = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate());
+
+            if (dobDate > minDateOfBirth) {
+                errorMessage.textContent = 'You must be at least 18 years old';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Validate Phone Number
+        function validatePhoneNumber(phoneNumberFieldId, errorMessageId) {
+            const phoneNumberField = document.getElementById(phoneNumberFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const phoneNumber = phoneNumberField.value.trim();
+
+            if (phoneNumber === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (phoneNumber.length !== 10 || isNaN(phoneNumber)) {
+                errorMessage.textContent = 'Phone number must be exactly 10 digits';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Validate Email
+        function validateEmail(emailFieldId, errorMessageId) {
+            const emailField = document.getElementById(emailFieldId);
+            const errorMessage = document.getElementById(errorMessageId);
+            const emailValue = emailField.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (emailValue === '') {
+                errorMessage.textContent = 'This field is required';
+                errorMessage.style.display = 'block';
+                return false;
+            } else if (!emailRegex.test(emailValue)) {
+                errorMessage.textContent = 'Please enter a valid email address';
+                errorMessage.style.display = 'block';
+                return false;
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+                return true;
+            }
+        }
+
+        }
+    </script>  
+{% endblock head %}
+
+{% block content %}
+{% if messages %}
+<div id="message-container">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="add_user-container">
+    <div class="adduser_inputitemsheader">
+        <h1>Search with Notice ID to Edit Notices</h1>
+    </div>
+    <form class="input-box" method="post" action="{% url 'editnotices' %}">
+        {% csrf_token %}
+        <div class="adduser_inputitems">
+            <label for="email">Notice id</label>
+            <span class="error-message" id="email-error"></span>
+            <input type="number" id="semail" name="semail" required>
+        </div>
+        <button class="next-btn" type="submit">Search Notices</button>
+    </form>
+</div>
+
+<div class="add_user-container2" {% if user %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+    <div class="adduser_inputitems">
+        <h1>Edit Notices</h1>
+    </div>
+    <form class="input-box update-user-form" method="post" action="{% url 'update_notices' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+    
+        <div class="adduser_inputitems">
+            <label for="first-name">Notice Id</label>
+            <span class="error-message" id="first-name-error"></span>
+            <input type="text" id="first-name" name="id" value="{{ notice.id }}" required readonly>
+        </div>
+        <div class="adduser_inputitems">
+            <label for="first-name">Notice Header</label>
+            <span class="error-message" id="first-name-error"></span>
+            <input type="text" id="first-name" name="notice_header" value="{{ notice.notice_header }}" required>
+        </div>
+        <div class="adduser_inputitems">
+            <div class="noticeimg">
+                <label for="middle-name">Notices Images</label>
+                {% if notice.notice_img %}
+                    <img src="{{ notice.notice_img.url }}" class="notice_img">
+                    <input type="hidden" name="existing_notice_img" value="{{ notice.notice_img }}">
+                {% endif %}
+                <span>Do you want to change the notice image?</span>
+                <input type="file" id="notice_img" name="notice_img">
+            </div>
+        </div>
+        <div class="adduser_inputitems">
+            <label for="last-name">Notices Description</label>
+            <span class="error-message" id="last-name-error"></span>
+            <input type="textarea" rows="8" id="last-name" name="notice_description" value="{{ notice.notice_description }}" required>
+        </div>
+    
+        <button class="next-btn" type="submit">Edit Notice</button>
+    </form>
+    
+</div>
+
+{% endblock %}
