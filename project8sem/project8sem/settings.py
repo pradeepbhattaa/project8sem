@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'project8sem.urls'
 
 TEMPLATES = [
     {
@@ -81,7 +81,7 @@ TEMPLATES = [
         },
     },
 ]
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'project8sem.wsgi.application'
 
 
 # Database
