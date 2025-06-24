@@ -1,0 +1,34 @@
+/* zoom.css */
+.zoom-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.zoom-container img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.2s ease-in-out;
+}
+
+.zoom-container.zoomed img {
+    transform: scale(2); /* Adjust the scale value as per requirement */
+    z-index: 1000;
+}
+
+.zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.zoom-container.zoomed .zoom-overlay {
+    display: flex;
+}

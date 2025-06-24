@@ -1,0 +1,82 @@
+/* Add User Page Styles */
+.add_user-container {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    justify-content: center;
+    padding: 20px;
+
+}
+
+.adduser_inputitems h1{
+    text-align: center;
+}
+
+
+.adduser_inputitems {
+    
+    
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.adduser_inputitems label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.adduser_inputitems input,
+.adduser_inputitems select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+
+
+.adduser_inputitems .middle-label {
+    display: flex;
+    justify-content: space-between;
+}
+
+.adduser_inputitems .middle-label .optional {
+    color: #888;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8rem;
+    display: none;
+}
+
+
+.next-btn{
+    padding: 10px;
+    font-size: 20px;
+    border-radius:6px;
+}
+
+.next-btn:hover{
+    background-color: black;
+    color:white;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .adduser_inputitems {
+        max-width: 100%;
+    }
+}
+
+
+@media screen and (max-width: 624px) {
+    .add_user-container{
+        width: 90%;
+    }
+}
