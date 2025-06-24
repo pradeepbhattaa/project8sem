@@ -1,0 +1,159 @@
+<!-- myapp/templates/myapp/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}View Candidate{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/view_candidate.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+
+ 
+       
+</head>
+<body>
+
+ <!-- Display alert messages -->
+ {% if messages %}
+ <div id="message-container">
+     {% for message in messages %}
+     <div class="alert {{ message.tags }}">
+         <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+         {{ message }}
+     </div>
+     {% endfor %}
+ </div>
+ {% endif %}
+
+    <div class="header">
+        <div class="logo">
+            <p>Hello</p>
+        </div>
+        <div class="title-header">
+            <h1 class="admin-header">Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul class="nav-links">
+                <li> <a href="{% url 'base'%}"> Home  </a></li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                    <ul id="user-submenu" class="submenu">
+                        <li><a href="{% url 'adduser' %}">Add User</a></li>
+                        <li><a href="{% url 'edituser' %}">Edit User</a></li>
+                        
+                        <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                        <li><a href="{% url 'view_users' %}">View Users</a></li>
+                        
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                    <ul id="notice-submenu" class="submenu">
+                        <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
+                        <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
+                        <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
+                        <li><a href="{% url 'view_notices' %}">View Notices</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                    <ul id="candidate-submenu" class="submenu">
+                        <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
+                        <li><a href="{% url 'editcandidate' %}">Edit Candidate</a></li>
+                        <li><a href="{% url 'deletecandidate' %}">Delete Candidate</a></li>
+                        <li><a href="{% url 'viewcandidate' %}">View Candidates</a></li>
+                        <li><a href="{% url 'viewall_candidate' %}">View All  Candidates</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
+                    <ul id="kyc-submenu" class="submenu">
+                        <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
+                        <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
+                        <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
+
+                    </ul>
+                </li>
+                
+
+                <li><a href="{% url 'adminlogout' %}">Logout</a></li>
+                <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+
+            <h1>Search with Email to View Candidate</h1>
+
+            <div class="add_user-container">
+              
+                <form class="input-box" method="post" action="{% url 'viewcandidate' %}">
+                    {% csrf_token %}
+                    <div class="adduser_inputitems">
+                        <label for="email">Email</label>
+                        <span class="error-message" id="email-error"></span>
+                        <input type="email" id="semail" name="email" required>
+                    </div>
+                    <button class="next-btn" type="submit">Search User</button>
+                </form>
+            </div>
+            
+
+                <div class="candidate-details" id="candidateDetails">
+                    <div class="candidate-card">
+                        <img src="{{ candidate.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                        <div class="details">
+                            <h2>{{ candidate.first_name }} {{ candidate.middle_name }} {{ candidate.last_name }}</h2>
+                            <p><strong>Date of Birth:</strong> {{ candidate.date_of_birth }}</p>
+                            <p><strong>Email:</strong> {{ candidate.email }}</p>
+                            <p><strong>Phone Number:</strong> {{ candidate.phone_number }}</p>
+                            <p><strong>Role:</strong> {{ candidate.get_role_display }}</p>
+                            <p><strong>Political Party:</strong> {{ candidate.get_political_party_display }}</p>
+                            <p><strong>District:</strong> {{ candidate.district }}</p>
+                            <p><strong>Municipality:</strong> {{ candidate.municipality }}</p>
+                            <p><strong>Ward:</strong> {{ candidate.ward }}</p>
+                            <div class="citizenship-photos">
+                                <img src="{{ candidate.citizenship_front.url }}" alt="Citizenship Front" class="citizenship-photo">
+                                <img src="{{ candidate.citizenship_back.url }}" alt="Citizenship Back" class="citizenship-photo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    </div>
+
+
+    <script>
+        // JavaScript to hide and show the candidate details
+        document.addEventListener("DOMContentLoaded", function() {
+            const candidateDetails = document.getElementById('candidateDetails');
+            if (!candidateDetails) {
+                return;
+            }
+
+            // Initially hide the candidate details section
+            candidateDetails.style.display = 'none';
+
+            // Show the candidate details section if it exists
+            {% if candidate %}
+                candidateDetails.style.display = 'block';
+            {% endif %}
+        });
+    </script>
+  
+
+    <script src="{% static 'myapp/js/dashboard.js' %}"></script>
+
+    <script src="{% static 'myapp/js/alert.js' %}"> </script>
+    
+    
+
+    
+    
+</body>
+</html>

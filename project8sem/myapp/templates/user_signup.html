@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Signup</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/user_signup.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+
+</head>
+<body>
+
+     <!-- Display alert messages -->
+ {% if messages %}
+ <div id="message-container">
+     {% for message in messages %}
+     <div class="alert {{ message.tags }}">
+         <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+         {{ message }}
+     </div>
+     {% endfor %}
+ </div>
+ {% endif %}
+
+
+    <div class="container">
+        <h1>Register</h1>
+        <div class="step-indicator">
+            <div class="step-circle active"></div>
+            <div class="step-circle"></div>
+        </div>
+        <form id="register-form" method="POST" action="{% url 'signup' %}">
+            {% csrf_token %}
+            <div class="section show" id="section-1">
+                <div class="input-box">
+                    <label for="first-name">First Name</label>
+                    <span class="error-message" id="first-name-error"></span>
+                    <input type="text" id="first-name" name="first_name" required>
+                </div>
+                <div class="input-box">
+                    <div class="middle-label">
+                        <label for="middle-name">Middle Name</label>
+                        <label for="middle-name" class="optional">*Optional</label>
+                    </div>
+                    <span class="error-message" id="middle-name-error"></span>
+                    <input type="text" id="middle-name" name="middle_name">
+                </div>
+                <div class="input-box">
+                    <label for="last-name">Last Name</label>
+                    <span class="error-message" id="last-name-error"></span>
+                    <input type="text" id="last-name" name="last_name" required>
+                </div>
+                <div class="input-box">
+                    <label for="dob">Date of Birth</label>
+                    <span class="error-message" id="dob-error"></span>
+                    <input type="date" id="dob" name="dob" required>
+                </div>
+                <div class="input-box">
+                    <button type="button" class="next-btn" id="next-btn">Next</button>
+                </div>
+            </div>
+            <div class="section" id="section-2">
+                <div class="input-box">
+                    <label for="phone_number">Phone Number</label>
+                    <span class="error-message" id="phone-error"></span>
+                    <input type="number" id="phone_number" name="phonenumber" required>
+                </div>
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <span class="error-message" id="email-error"></span>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-box">
+                    <label for="password">Password</label>
+                    <span class="error-message" id="password-error"></span>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="input-box">
+                    <label for="confirm_password">Confirm Password</label>
+                    <span class="error-message" id="confirm-password-error"></span>
+                    <input type="password" id="confirm_password" name="cpassword" required>
+                </div>
+                <div class="input-box">
+                    <button class="next-btn" type="submit">Register</button>
+                </div>
+                <a href="#" class="back-btn">Back</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'myapp/js/user_signupvalidation.js' %}"></script>
+    <script src="{% static 'myapp/js/alert.js' %}"></script>
+    
+</body>
+</html>

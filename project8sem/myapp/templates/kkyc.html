@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Form</title>
+    {% load static %}
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'myapp/css/nav.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/kkyc.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+
+</head>
+<body>
+
+<!-- Display alert messages -->
+{% if messages %}
+<div id="message-container">
+    {% for message in messages %}
+    <div class="alert {{ message.tags }}">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<header>
+    <nav>
+        <div class="nav-left">
+            <div class="menu-icon" onclick="openNav()">&#9776;</div>
+            <div class="logo"><img src="{% static 'myapp/images/logo.jpg' %}" alt="Logo" class="circular-logo"></div>
+        </div>
+        <div class="nav-center" id="navLinks">
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'candidates' %}">Candidates</a>
+            <a href="{% url 'notices' %}">Notices</a>
+            <a href="{% url 'vote' %}">Vote Here</a>
+            <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+            <a href="{% url 'contact' %}">Contact</a>
+        </div>
+        <div class="nav-right">
+            {% if user_full_name %}
+                <span class="user-full-name">{{ user_full_name }}</span>
+                {% if user_profile_picture %}
+                    <img src="{{ user_profile_picture.photo_front.url }}" alt="Profile Picture" class="profiles-picture" onclick="toggleDropdown()">
+                {% else %}
+                <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture" onclick="toggleDropdown()">
+                {% endif %}
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="{% url 'edit_profile' %}" class="profile-items">Edit Profile</a>
+                    <a href="{% url 'user_logout' %}" class="profile-items">Logout</a>
+                </div>
+            {% else %}
+                <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
+            {% endif %}
+        </div>
+    </nav>
+</header>
+
+<div class="side-menu" id="sideMenu">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div id="sideNavLinks">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'candidates' %}">Candidates</a>
+        <a href="{% url 'notices' %}">Notices</a>
+        <a href="{% url 'vote' %}">Vote Here</a>
+        <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+        <a href="{% url 'contact' %}">Contact</a>
+    </div>
+</div>
+
+<div class="container">
+    <form id="register-form" action="{% url 'verify_kyc' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="sectiondiv show" id="section-1">
+         <div id="page1" class="form-page">
+            <h1 class="titleform">KYC Form</h1>
+            <h3 class="kyc-header">General Information</h3>
+            <div class="section">
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="first-name">First Name</label>
+                        <span class="error-message" id="first-name-error"></span>
+                    </div>
+                    <input type="text" id="first-name" name="first_name" value="{{ user.first_name }}">
+                </div>
+                <div class="input-box">
+                    <div class="middle-label">
+                        
+                            <label for="middle-name">Middle Name</label>
+                            <label for="middle-name" class="optional">*Optional</label>
+                            <span class="error-message" id="middle-name-error"></span>
+                        
+                        
+                    </div>
+                    <input type="text" id="middle-name" name="middle_name" value="{{ user.middle_name }}">
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="last-name">Last Name</label>
+                        <span class="error-message" id="last-name-error"></span>
+                    </div>
+                    <input type="text" id="last-name" name="last_name"value="{{ user.last_name }}">
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="dob">Date of Birth</label>
+                        <span class="error-message" id="dob-error"></span>
+                    </div>
+                    <input type="date" id="dob" name="dob" value="{{ user.dob|date:'Y-m-d' }}">
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="phone_number">Phone Number</label>
+                        <span class="error-message" id="phone-error"></span>
+                    </div>
+                    <input type="number" id="phone_number" name="phonenumber" value="{{ user.phone_number }}">
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="email">Email</label>
+                        <span class="error-message" id="email-error"></span>
+                    </div>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" readonly>
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="citizenship_number">Citizenship Number:</label>
+                        <span class="error-message" id="citizen-error"></span>
+                    </div>
+                    <input type="text" id="citizenship_number" name="citizenship_number">
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                    <label for="voter_id">Voter ID No.:</label>
+                    <span class="error-message" id="voter-error"></span>
+                    
+                    </div>
+                    <input type="text" id="voter_id" name="voter_id">
+                </div>
+                <div class="gender-container">
+                    <label>Gender:</label>
+                    <div class="genderradio">
+                        <input type="radio" id="male" name="gender" value="male" required>Male
+                        <input type="radio" id="female" name="gender" value="female" required>Female
+                        <input type="radio" id="others" name="gender" value="others" required >Others
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="kyc-header">Address Information</h3>
+            <div class="section">
+                <div class="input-box">
+                    <label for="country">Country:</label>
+                    <select id="country" name="country" required onchange="updateProvinces(this.value);">
+                        <option value="">Select Country</option>
+                        <option value="country1">Nepal</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="province">Province:</label>
+                    <select id="province" name="province"  required onchange="updateDistricts(this.value);">
+                        <option value="">Select Province</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label for="district">District:</label>
+                    <select id="district" name="district" required></select>
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="municipality">Rural/Municipality:</label>
+                        <span class="error-message" id="municipal-error"></span>
+                    </div>
+                    <input type="text" id="municipality" name="municipality">
+                </div>
+                <div class="input-box">
+                    <div class="errorlabel">
+                        <label for="ward_no">Ward No:</label>
+                        <span class="error-message" id="ward-error"></span>
+                    </div>
+                    <input type="number" id="ward_no" name="ward_no">
+                </div>
+                
+            </div>
+            <div class="input-box">
+                <button type="button" class="next-btn" id="next-btn">Next</button>
+            </div>
+         </div>
+        </div>
+
+        <div id="page2" class="form-page" >
+            <div class="sectiondiv" id="section-2">
+
+            <h3>Upload Photo</h3>
+            <div class="section1">
+                <div class="upload-section">
+                    <div class="upload-box">
+                        <h2>Passport-Size Photo</h2>
+                        <div>Drag your file here or click here to upload</div>
+                        <input type="file" id="fileInputFront" name="photo_front" accept="image/*" required>
+                    </div>
+                    <div class="upload-box">
+                        <h2>Voter-ID</h2>
+                        <div>Drag your file here or click here to upload</div>
+                        <input type="file" id="fileInputVoterID" name="photo_voter" accept="image/*" required>
+                    </div>
+                </div>
+                <div class="upload-section">
+                    <div class="upload-box">
+                        <h2>Citizenship Photo (Front)</h2>
+                        <div>Drag your file here or click here to upload</div>
+                        <input type="file" id="fileInputCitizenshipFront" name="photo_citizenship_front" accept="image/*" required>
+                    </div>
+                    <div class="upload-box">
+                        <h2>Citizenship Photo (Back)</h2>
+                        <div>Drag your file here or click here to upload</div>
+                        <input type="file" id="fileInputCitizenshipBack" name="photo_citizenship_back" accept="image/*" required>
+                    </div>
+                </div>
+            </div>
+            <div class="input-box">
+                <button class="next-btn" type="submit">Register</button>
+            </div>
+            <a href="#" class="back-btn">Back</a>
+        </div>
+        </div>
+    </div>
+
+    </form>
+</div>
+</div>
+
+
+
+<script src="{% static 'myapp/js/alert.js' %}"></script>
+<script src="{% static 'myapp/js/kycvalidation.js' %}"></script>
+<script src="{% static 'myapp/js/kkyc.js' %}"></script>
+<script src="{% static 'myapp/js/navs.js' %}"></script>
+<script src="{% static 'myapp/js/profilesdropdown.js' %}"></script>
+
+</body>
+</html>

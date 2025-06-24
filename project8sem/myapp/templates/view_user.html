@@ -1,0 +1,40 @@
+{% extends "myapp/base.html" %}
+
+{% block title %}View Users{% endblock %}
+
+{% block head %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/view_user.css' %}">
+
+{% endblock %}
+
+{% block content %}
+    <h1>All Users</h1>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Last Name</th>
+                <th>Date of Birth</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td data-label="#"> {{ forloop.counter }}</td>
+                <td data-label="First Name">{{ user.first_name }}</td>
+                <td data-label="Middle Name">{{ user.middle_name|default_if_none:'#' }}</td>
+                <td data-label="Last Name">{{ user.last_name }}</td>
+                
+                <td data-label="Date of Birth">{{ user.dob }}</td>
+                <td data-label="Phone Number">{{ user.phone_number }}</td>
+                <td data-label="Email">{{ user.email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

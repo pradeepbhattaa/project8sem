@@ -1,0 +1,117 @@
+<!-- myapp/templates/myapp/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    {% block head %}{% endblock %}
+
+</head>
+<body>
+
+ <!-- Display alert messages -->
+ {% if messages %}
+ <div id="message-container">
+     {% for message in messages %}
+     <div class="alert {{ message.tags }}">
+         <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+         {{ message }}
+     </div>
+     {% endfor %}
+ </div>
+ {% endif %}
+
+    <div class="header">
+        <div class="logo">
+           <p> logo </p>
+        </div>
+        <div class="title-header">
+            <h1 class="admin-header">Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul class="nav-links">
+                <li> <a href="{% url 'base'%}"> Home  </a></li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                    <ul id="user-submenu" class="submenu">
+                        <li><a href="{% url 'adduser' %}">Add User</a></li>
+                        <li><a href="{% url 'edituser' %}">Edit User</a></li>
+                        
+                        <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                        <li><a href="{% url 'view_users' %}">View Users</a></li>
+                        
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                    <ul id="notice-submenu" class="submenu">
+                        <li><a href="#">Add Notice</a></li>
+                        <li><a href="#">Edit Notice</a></li>
+                        <li><a href="#">Delete Notice</a></li>
+                        <li><a href="#">View Notices</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                    <ul id="candidate-submenu" class="submenu">
+                        <li><a href="#">Add Candidate</a></li>
+                        <li><a href="#">Edit Candidate</a></li>
+                        <li><a href="#">Delete Candidate</a></li>
+                        <li><a href="#">View Candidates</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('reports-submenu')">Reports</a>
+                    <ul id="reports-submenu" class="submenu">
+                        <li><a href="#">Generate Report</a></li>
+                        <li><a href="#">View Reports</a></li>
+                    </ul>
+                </li>
+
+
+                <li>
+                    <a href="#" onclick="toggleSubmenu('settings-submenu')">Settings</a>
+                    <ul id="settings-submenu" class="submenu">
+                        <li><a href="#">Profile Settings</a></li>
+                        <li><a href="#">System Settings</a></li>
+                    </ul>
+                </li>
+
+                <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+                <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+     
+
+    {% block adduserjs %}
+      
+            {% endblock %}
+
+
+  
+
+    <script src="{% static 'myapp/js/dashboard.js' %}"></script>
+
+    <script src="{% static 'myapp/js/alert.js' %}"> </script>
+    
+    
+
+    
+    
+</body>
+</html>

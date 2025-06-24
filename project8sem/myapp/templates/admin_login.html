@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    {% load static %}
+    
+    <link rel="stylesheet" href="{% static 'myapp/css/user_login.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    
+</head>
+<body>
+
+ <!-- Display alert messages -->
+ {% if messages %}
+ <div id="message-container">
+     {% for message in messages %}
+     <div class="alert {{ message.tags }}">
+         <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+         {{ message }}
+     </div>
+     {% endfor %}
+ </div>
+ {% endif %}
+
+    <div class="container">
+        <h1>Admin Login</h1>
+        
+        <form class="input-box" method="post" action="{% url 'login' %}" >
+            {% csrf_token %}
+            <div class="input-items">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" >
+            </div>
+            <div class="input-items">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" >
+            </div>
+            <div class="input-items">
+                <button type="submit" value="Log In" class="login-btn">Log In </button>
+            </div>
+        </form>
+    </div>
+
+
+   <script src="{%static 'myapp/js/alert.js' %}"> </script>
+  
+
+</body>
+</html>
