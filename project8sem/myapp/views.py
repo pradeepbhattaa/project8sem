@@ -321,3 +321,87 @@ def view_users(request):
         return redirect('login') 
     users = UserProfile.objects.all()
     return render(request, 'myapp/view_user.html', {'users': users}) 
+
+
+def home(request):
+    users = UserProfile.objects.all()
+    user_profile_picture = None
+    user_full_name = None
+
+    email = request.session.get('email')
+    if email:
+        try:
+            user_profile = get_object_or_404(UserProfile, email=email)
+            user_full_name = f"{user_profile.first_name} {user_profile.middle_name} {user_profile.last_name}"
+
+            try:
+                profile_picture = ProfilePicture.objects.get(email=email)
+                user_profile_picture = profile_picture.photo_front.url
+            except ProfilePicture.DoesNotExist:
+                pass
+
+        except UserProfile.DoesNotExist:
+            pass
+
+    return render(request, 'myapp/home.html', {
+        'users': users,
+        'user_profile_picture': user_profile_picture,
+        'user_full_name': user_full_name,
+    })
+
+
+def contact(request):
+    if not request.session.get('user_verified'):
+        return redirect('userlogin')
+  
+    users = UserProfile.objects.all()
+    user_profile_picture = None
+    user_full_name = None
+
+    email = request.session.get('email')
+    if email:
+        try:
+            profile_picture = ProfilePicture.objects.get(email=email)
+            user_profile_picture = profile_picture.photo_front.url
+        except ProfilePicture.DoesNotExist:
+            pass
+
+        try:
+            user_profile = UserProfile.objects.get(email=email)
+            user_full_name = f"{user_profile.first_name} {user_profile.middle_name} {user_profile.last_name}"
+        except UserProfile.DoesNotExist:
+            pass
+
+    return render(request, 'myapp/contact.html', {
+        'users': users,
+        'user_profile_picture': user_profile_picture,
+        'user_full_name': user_full_name,
+    })
+
+def notices(request):
+    if not request.session.get('user_verified'):
+        return redirect('userlogin')
+
+    notices = Notice.objects.all()
+    user_profile_picture = None
+    user_full_name = None
+
+    email = request.session.get('email')
+    if email:
+        try:
+            profile_picture = ProfilePicture.objects.get(email=email)
+            user_profile_picture = profile_picture.photo_front.url
+        except ProfilePicture.DoesNotExist:
+            pass
+
+        try:
+            user_profile = UserProfile.objects.get(email=email)
+            user_full_name = f"{user_profile.first_name} {user_profile.middle_name} {user_profile.last_name}"
+        except UserProfile.DoesNotExist:
+            pass
+
+    return render(request, 'myapp/notices.html', {
+        'notices': notices,
+        'user_profile_picture': user_profile_picture,
+        'user_full_name': user_full_name,
+    })

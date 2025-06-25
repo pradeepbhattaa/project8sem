@@ -42,5 +42,6 @@ urlpatterns = [
 
 
                   path('view_users/', views.view_users, name='view_users'),
+                  path('home/',views.home,name="home"),
 
     ]

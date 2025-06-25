@@ -35,3 +35,41 @@ class UserProfile(models.Model):
 
     class Meta:
         db_table = 'usersignup'
+
+
+        
+def get_notice_image_upload_path(instance, filename):
+    return f'notices/{instance.id}/{filename}'
+
+class Notice(models.Model):
+    notice_header = models.CharField(max_length=255)
+    notice_img = models.ImageField(upload_to=get_notice_image_upload_path)
+    notice_description = models.TextField()
+    
+
+    class Meta:
+        db_table='notices'
+
+
+    def __str__(self):
+        return self.notice_header
+    
+
+
+    
+def profile_picture_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/candidates/<email>/<filename>
+    return f'profile_picture/{instance.email}/{filename}'
+
+
+class ProfilePicture(models.Model):
+
+    email = models.EmailField()
+    photo_front = models.ImageField(upload_to=profile_picture_path)
+
+    class Meta:
+        db_table='profilepicture'
+
+
+    def __str__(self):
+        return self.email
