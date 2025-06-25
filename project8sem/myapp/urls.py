@@ -43,5 +43,7 @@ urlpatterns = [
 
                   path('view_users/', views.view_users, name='view_users'),
                   path('home/',views.home,name="home"),
+                  path('notices/',views.notices,name="notices"),
+                  path('contact/',views.contact,name="contact"),
 
     ]
