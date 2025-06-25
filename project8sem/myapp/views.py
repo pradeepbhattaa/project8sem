@@ -11,6 +11,10 @@ from .models import UserProfile
 from .models import ProfilePicture
 from .models import Notice
 
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+from .models import EmailVerification
+
 
 # Create your views here.
 def register_user(request):
@@ -325,6 +329,86 @@ def view_users(request):
         return redirect('login') 
     users = UserProfile.objects.all()
     return render(request, 'myapp/view_user.html', {'users': users}) 
+
+#### 1st step of forgot password  to verify email and sent the code to the user email and save otp and email the data in the database in EmailVerification table
+# View for verifying email and sending OTP
+# View for verifying email and generating OTP
+def verify_email(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        if UserProfile.objects.filter(email=email).exists():
+            # Email exists in the database
+            otp_code = get_random_string(length=6, allowed_chars='1234567890')
+            EmailVerification.objects.create(email=email, otp_code=otp_code)
+            send_mail(
+                'OTP for Email Verification',
+                f'Your OTP code to verify your email for Online voting system is: {otp_code}',
+                'theapocalypseitproject@gmail.com',
+                [email],
+                fail_silently=False,
+            )
+
+            # Store email and verification status in session
+            request.session['email'] = email
+            request.session['page_a_completed'] = True
+            request.session['page_b_completed'] = False
+
+            messages.success(request, 'User has been successfully verified. Please check your email for the OTP.')
+            return redirect('verify_otp')  # Redirect to verify_otp.html
+        else:
+            messages.error(request, 'User with this email is not registered.')
+            return redirect('verify_email')
+    return render(request, 'myapp/verify_email.html')
+
+# View for verifying OTP and redirecting to update password page
+def verify_otp(request):
+    if not request.session.get('page_a_completed'):
+        return redirect('userlogin')  # Redirect to verify_email if page_a is not completed
+
+    email = request.session.get('email')
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+        email_verification = EmailVerification.objects.filter(email=email, otp_code=otp).first()
+        if email_verification:
+            # OTP is correct
+            request.session['page_b_completed'] = True
+            request.session['page_a_completed'] = False  # Clear Page A session data
+            messages.success(request, 'Email verified successfully.')
+            return redirect('update_password')  # Redirect to update_password.html
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+    return render(request, 'myapp/verify_otp.html')
+
+# View for updating the password after validation
+def update_password(request):
+    if not request.session.get('page_b_completed'):
+        return redirect('userlogin')  # Redirect to verify_otp if page_b is not completed
+
+    email = request.session.get('email')
+    if request.method == 'POST':
+        new_password = request.POST.get('npassword')
+        confirm_password = request.POST.get('ncpassword')
+
+        if new_password != confirm_password:
+            messages.error(request, 'Passwords do not match. Please try again.')
+            return render(request, 'myapp/update_password.html')
+
+        user = UserProfile.objects.get(email=email)  # Retrieve the user object
+        hashed_password = make_password(new_password)  # Hash the new password
+        user.password = hashed_password  # Set the hashed password
+        user.save()
+
+        # Clear all session data after successful password update
+        request.session.flush()
+
+        messages.success(request, 'Your password was successfully updated!')
+        return redirect('userlogin')  # Redirect to login page
+    return render(request, 'myapp/update_password.html')
+
+
+def view_otp(request):
+    users = EmailVerification.objects.all()
+    return render(request, 'myapp/view_otp.html', {'users': users}) 
 
 
 def home(request):

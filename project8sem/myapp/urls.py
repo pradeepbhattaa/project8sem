@@ -39,6 +39,14 @@ urlpatterns = [
 
 
                 path('delete_user_confirm/', views.delete_user_confirm, name='delete_user_confirm'),
+                 
+                  path('view_otp/', views.view_otp, name='view_otp'),
+
+                  path('verify_email/',views.verify_email,name="verify_email"),
+
+                  path('verify_otp/',views.verify_otp,name="verify_otp"),
+
+                  path('update_password/',views.update_password,name="update_password"),
 
 
                   path('view_users/', views.view_users, name='view_users'),

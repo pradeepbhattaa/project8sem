@@ -75,6 +75,14 @@ class ProfilePicture(models.Model):
         return self.email
     
 
+class EmailVerification(models.Model):
+    email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta: 
+        db_table = 'emailverification'
+        
 
 class Notice(models.Model):
     notice_header = models.CharField(max_length=255)
