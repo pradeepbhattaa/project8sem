@@ -73,3 +73,18 @@ class ProfilePicture(models.Model):
 
     def __str__(self):
         return self.email
+    
+
+
+class Notice(models.Model):
+    notice_header = models.CharField(max_length=255)
+    notice_img = models.ImageField(upload_to=get_notice_image_upload_path)
+    notice_description = models.TextField()
+    
+
+    class Meta:
+        db_table='notices'
+
+
+    def __str__(self):
+        return self.notice_header

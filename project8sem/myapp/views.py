@@ -8,6 +8,10 @@ from .models import UserRegistration
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from .models import UserProfile
+from .models import ProfilePicture
+from .models import Notice
+
+
 # Create your views here.
 def register_user(request):
     if request.method == 'POST':
