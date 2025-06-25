@@ -6,6 +6,7 @@ from django.contrib.auth import login as auth_login
 from .models import Test
 from .models import UserRegistration
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 from .models import UserProfile
 # Create your views here.
 def register_user(request):
@@ -224,4 +225,99 @@ def edituser(request):
         except UserProfile.DoesNotExist:
             messages.error(request, 'User with this email does not exist.')
             return redirect('edituser')
-    return render(request, 'myapp/edit_user.html', {'email_exists': False})
+    return render(request, 'myapp/edit_user.html', {'email_exists': False}) 
+
+
+#### update the user information  using admin code 
+def update_user(request):
+     
+    if not request.session.get('admin_verified'):
+        return redirect('login') 
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        middle_name = request.POST.get('middle_name')
+        last_name = request.POST.get('last_name')
+        dob = request.POST.get('dob')
+        phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email')
+
+        # Validate email
+        if not email:
+            messages.error(request, 'Email field cannot be empty.')
+            return redirect('edituser')
+
+        # Validate other fields (similar validation logic can be applied here)
+        if not first_name or not last_name or not dob or not phone_number:
+            messages.error(request, 'All fields except middle name must be filled.')
+            return redirect('edituser')
+
+        try:
+            user = UserProfile.objects.get(email=email)
+            
+            # Update only the specified fields
+            user.first_name = first_name
+            user.middle_name = middle_name
+            user.last_name = last_name
+            user.dob = dob
+            user.phone_number = phone_number
+            
+            user.save()
+            messages.success(request, 'User details updated successfully.')
+        except UserProfile.DoesNotExist:
+            messages.error(request, 'User with this email does not exist.')
+            return redirect('edituser')
+
+        return redirect('edituser')
+    else:
+        messages.error(request, 'Invalid request method.')
+        return redirect('edituser')
+
+
+#### 1st step of Delete the User using admin code or to search email exist in the database or not code 
+def deleteuser(request):
+     
+    if not request.session.get('admin_verified'):
+        return redirect('login') 
+    if request.method == 'POST':
+        email = request.POST.get('semail')
+
+
+        try:
+            user = UserProfile.objects.get(email=email)
+            messages.success(request, 'User with this email does  exist.')
+            return render(request, 'myapp/delete_user.html', {'user': user})
+        except UserProfile.DoesNotExist:
+            messages.error(request, 'User with this email does not exist.')
+            return redirect('deleteuser')
+    return render(request, 'myapp/delete_user.html', {'email_exists': False})
+
+
+#### update the user information  using admin code 
+def delete_user_confirm(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+
+
+        if not email:
+            messages.error(request, 'Email field cannot be empty.')
+            return redirect('deleteuser')
+
+
+        try:
+            user = UserProfile.objects.get(email=email)
+            user.delete()
+            messages.success(request, 'User has been successfully deleted.')
+            return redirect('deleteuser')
+        except UserProfile.DoesNotExist:
+            messages.error(request, 'User with this email does not exist.')
+            return redirect('deleteuser')
+    return redirect('deleteuser') 
+
+
+##### To view the data of all user of database code 
+def view_users(request):
+     
+    if not request.session.get('admin_verified'):
+        return redirect('login') 
+    users = UserProfile.objects.all()
+    return render(request, 'myapp/view_user.html', {'users': users}) 

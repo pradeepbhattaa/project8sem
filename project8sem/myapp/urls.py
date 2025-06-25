@@ -32,5 +32,15 @@ urlpatterns = [
            path('edit_user/', views.edituser, name='edituser'),
 
 
+ path('update_user/', views.update_user, name='update_user'),
+
+              
+              path('delete_user/', views.deleteuser, name='deleteuser'),
+
+
+                path('delete_user_confirm/', views.delete_user_confirm, name='delete_user_confirm'),
+
+
+                  path('view_users/', views.view_users, name='view_users'),
 
     ]
