@@ -1,78 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap');
-
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #e0faff; /* Changed to match signup.css gradient base */
-    color: #333;
-    margin: 0;
-    padding: 0;
-    scroll-behavior: smooth;
-}
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #d4f7ff, #f9fdff);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
 
-.profile-picture,
-#profile-picture {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
+        main {
+            padding-top: 80px;
+        }
 
-.profile-picture:hover {
-    cursor: pointer;
-    border: solid #34d8eb; /* Changed to signup.css accent color */
-    transform: scale(1.1);
-}
-
-.profile-items:hover {
-    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
-}
-
-.user-full-name {
-    margin-right: 20px;
-    font-weight: 550;
-    font-size: 20px;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    right: 10px;
-    top: 70px;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.dropdown-menu a {
-    color: #333;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    transition: background-color 0.3s ease;
-}
-
-.dropdown-menu a:hover {
-    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
-}
-
-header {
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000;
-    transition: all 0.3s ease;
-}
-
-main {
-    padding-top: 80px;
-}
- .welcome-section {
+        /* Welcome Section */
+        .welcome-section {
             text-align: center;
             padding: 80px 20px 30px 20px;
         }
@@ -186,17 +126,10 @@ main {
             color: #0b2c48;
         }
 
-@media (max-width: 768px) {
-    .nav-links {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        background-color: #fff;
-        position: absolute;
-        top: 60px;
-        left: 0;
-    }
-      .how-steps {
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .how-steps {
                 flex-direction: column;
                 align-items: center;
             }
@@ -207,4 +140,5 @@ main {
                 gap: 40px;
             }
 
-}
+          
+        }
