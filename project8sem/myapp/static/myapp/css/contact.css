@@ -7,7 +7,7 @@
 }
 
 body {
-    background-color: #f7f9fc;
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
 }
 
 .profiles-picture {
@@ -17,8 +17,8 @@ body {
 }
 
 .profiles-picture:hover {
-   cursor:pointer;
-   border:solid #34d8eb;
+    cursor: pointer;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
 }
 
 #profile-picture {
@@ -27,8 +27,8 @@ body {
     border-radius: 50%;
 }
 
-.profile-items:hover{
-    background: linear-gradient(57deg, #8cc2ed, #46a5f2);
+.profile-items:hover {
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
 }
 
 .user-full-name {
@@ -41,19 +41,19 @@ body {
     display: none;
     position: absolute;
     background-color: white;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     right: 10px;
     top: 70px;
 }
 .dropdown-menu a {
-    color: black;
+    color: #333;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
 }
 .dropdown-menu a:hover {
-    background-color: #ddd;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
 }
 
 /* Navigation Bar Styling */
@@ -63,7 +63,7 @@ nav {
     align-items: center;
     background-color: white;
     padding: 10px 50px;
-    border-bottom: 1px solid #46a5f2;
+    border-bottom: 1px solid #34d8eb; /* Changed to signup.css accent */
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -108,7 +108,7 @@ nav {
 }
 
 .nav-center a:hover {
-    background: linear-gradient(57deg, #8cc2ed, #46a5f2);
+    background: linear-gradient(57deg, #34d8eb, #b1ebf2); /* Changed to match signup.css gradient */
     transform: scale(1.05);
     border-radius: 25px;
 }
@@ -126,15 +126,15 @@ nav {
 
 .login-button {
     text-decoration: none;
-    color: #16a085;
-    border: 2px solid #16a085;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border: 2px solid #34d8eb; /* Changed to signup.css accent */
     padding: 5px 10px;
     border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .login-button:hover {
-    background-color: #16a085;
+    background-color: #34d8eb; /* Changed to signup.css accent */
     color: white;
 }
 
@@ -149,7 +149,7 @@ nav {
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     z-index: 1001;
 }
 
@@ -164,9 +164,9 @@ nav {
 }
 
 .side-menu a:hover, .side-menu a.active {
-    color: #16a085;
-    background-color: rgba(22, 160, 133, 0.1);
-    border-left: 3px solid #16a085;
+    color: #34d8eb; /* Changed to signup.css accent */
+    background-color: rgba(52, 216, 235, 0.1); /* Adjusted to match signup.css accent */
+    border-left: 3px solid #34d8eb; /* Changed to signup.css accent */
 }
 
 .side-menu .closebtn {
@@ -243,7 +243,7 @@ nav {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background-color: #1abc9c;
+    background-color: #34d8eb; /* Changed to signup.css accent */
     color: white;
     padding: 10px 20px;
     border: none;
@@ -253,12 +253,12 @@ nav {
 }
 
 #back-to-top:hover {
-    background-color: #16a085;
+    background-color: #5eb051; /* Changed to match signup.css button hover */
 }
 
 .hero {
     padding: 60px 20px;
-    background-color: #eaf2f8;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
     text-align: center;
 }
 
@@ -270,11 +270,13 @@ nav {
 .hero h1 {
     font-size: 2.5em;
     margin-bottom: 20px;
+    color: #34d8eb; /* Changed to signup.css accent */
 }
 
 .hero p {
     font-size: 1.2em;
     margin-bottom: 20px;
+    color: #333;
 }
 
 .hero img {
@@ -304,8 +306,8 @@ nav {
     display: flex;
     align-items: center;
     background-color: transparent;
-    color: #ffffff;
-    border: 2px solid #ffffff;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border: 2px solid #34d8eb; /* Changed to signup.css accent */
     padding: 0.5rem 1rem;
     cursor: pointer;
     font-weight: bold;
@@ -318,7 +320,7 @@ nav {
 }
 
 .contact-btn:hover {
-    background-color: #5EB051;
+    background-color: #5eb051; /* Changed to match signup.css button hover */
     color: white;
 }
 
@@ -327,13 +329,13 @@ nav {
     padding: 2rem;
     margin: 2rem;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .contact-section h1 {
     text-align: center;
     margin-bottom: 2rem;
-    color: #003366;
+    color: #34d8eb; /* Changed to signup.css accent */
 }
 
 .contact-container {
@@ -353,7 +355,7 @@ nav {
 }
 
 .contact-item i {
-    color: #00509e;
+    color: #34d8eb; /* Changed to signup.css accent */
     font-size: 1.5rem;
     margin-right: 1rem;
 }
@@ -373,7 +375,7 @@ nav {
 .contact-form textarea {
     margin-bottom: 1rem;
     padding: 0.75rem;
-    border: 1px solid #ccc;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
     border-radius: 5px;
     font-size: 1rem;
 }
@@ -382,8 +384,8 @@ nav {
     display: flex;
     align-items: center;
     background-color: transparent;
-    color: #00509e;
-    border: 2px solid #00509e;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border: 2px solid #34d8eb; /* Changed to signup.css accent */
     padding: 0.5rem 1rem;
     cursor: pointer;
     font-weight: bold;
@@ -396,7 +398,7 @@ nav {
 }
 
 .contact-form button:hover {
-    background-color: #00509e;
+    background-color: #5eb051; /* Changed to match signup.css button hover */
     color: white;
 }
 
@@ -407,15 +409,15 @@ nav {
 
 .location-section h2 {
     margin-bottom: 2rem;
-    color: #003366;
+    color: #34d8eb; /* Changed to signup.css accent */
 }
 
 .about-section {
-    background-color: #f7f9fc;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
     padding: 2rem;
     margin: 2rem;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .contact-info {
@@ -437,7 +439,7 @@ nav {
 
 .contact-info .info-item i {
     font-size: 2em;
-    color: rgb(13, 186, 13); /* Light green */
+    color: #34d8eb; /* Changed to signup.css accent */
     margin-bottom: 10px;
 }
 
@@ -459,7 +461,7 @@ nav {
 }
 
 .about-section h1 {
-    color: #003366;
+    color: #34d8eb; /* Changed to signup.css accent */
     margin-bottom: 1rem;
 }
 
@@ -477,7 +479,7 @@ nav {
 .section h2 {
     font-size: 2em;
     margin-bottom: 10px;
-    color: rgb(13, 186, 13); /* Light green */
+    color: #34d8eb; /* Changed to signup.css accent */
     position: relative;
     padding-bottom: 10px;
 }
@@ -486,7 +488,7 @@ nav {
     content: '';
     width: 50px;
     height: 3px;
-    background-color: rgb(13, 186, 13); /* Light green */
+    background-color: #34d8eb; /* Changed to signup.css accent */
     position: absolute;
     bottom: 0;
     left: 0;
@@ -508,7 +510,7 @@ nav {
     width: 100%;
     padding: 1rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
     border-radius: 5px;
     outline: none;
 }
@@ -530,18 +532,18 @@ nav {
     top: -0.75rem;
     left: 1rem;
     font-size: 0.75rem;
-    color: #00509e;
+    color: #34d8eb; /* Changed to signup.css accent */
     background: #fff;
     padding: 0 0.25rem;
 }
 
 .floating-label input:focus,
 .floating-label textarea:focus {
-    border-color: #00509e;
+    border-color: #34d8eb; /* Changed to signup.css accent */
 }
 
 .footer {
-    background-color: #f2f2f2;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
     padding: 40px 20px;
     text-align: center;
 }
@@ -559,7 +561,7 @@ nav {
 
 .footer .footer-section h3 {
     margin-bottom: 20px;
-    color: #333;
+    color: #34d8eb; /* Changed to signup.css accent color */
 }
 
 .footer .footer-section a {
@@ -571,6 +573,7 @@ nav {
 
 .footer .footer-section a:hover {
     text-decoration: underline;
+    color: #34d8eb; /* Changed to signup.css accent color on hover */
 }
 
 .footer .social-icons {
@@ -580,7 +583,7 @@ nav {
 .footer .social-icons a {
     display: inline-block;
     margin: 0 10px;
-    color: #333;
+    color: #34d8eb; /* Changed to signup.css accent color */
     font-size: 24px;
 }
 
@@ -588,19 +591,19 @@ nav {
     color: #333;
     padding: 50px;
     margin-top: 40px;
-    border-top: 1px solid #46a5f2;
+    border-top: 1px solid #34d8eb; /* Changed to signup.css accent */
 }
 
 .footer .map {
     width: 100%;
     height: 450px;
     margin-top: 10px;
-   
 }
-.footer .loc{
+
+.footer .loc {
     padding: 2px;
     margin: 5px;
-    border-bottom: 1px solid #46a5f2;
+    border-bottom: 1px solid #34d8eb; /* Changed to signup.css accent */
 }
 
 @media screen and (max-width: 992px) {
@@ -659,4 +662,3 @@ nav {
         padding: 0;
     }
 }
-
