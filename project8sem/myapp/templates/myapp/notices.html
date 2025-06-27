@@ -65,8 +65,11 @@
                         <img src="{{ notice.notice_img.url }}" alt="Notice Image">
                     </div>
                     <div class="candidate-details">
-                        <p><strong>{{ notice.notice_description }}</strong></p>
-                        <button class="more-info-btn">Read More</button>
+                       <div class="candidate-details">
+    <p class="notice-description">{{ notice.notice_description }}</p>
+    <button class="read-more">Read more</button>
+</div>
+
                     </div>
                 </div>
                 {% endfor %}
@@ -109,5 +112,6 @@
     <script src="{% static 'myapp/js/profiledropdown.js' %}"></script>
     <script src="{% static 'myapp/js/navs.js' %}"></script>
     <script src="{% static 'myapp/js/profilesdropdown.js' %}"></script>
+     <script src="{% static 'myapp/js/notices.js' %}"></script>
 </body>
 </html>
