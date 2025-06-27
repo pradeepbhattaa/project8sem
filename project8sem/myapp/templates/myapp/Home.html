@@ -73,17 +73,49 @@
     </div>
     
     <main>
-        <section class="hero">
-            <div class="leftside">
-                <img src="{% static 'myapp/images/image1.webp' %}" alt="Home Page">
+        
+    <section class="welcome-section">
+        <h1>Welcome to OVC</h1>
+        <p>We provide a secure and transparent platform<br>for you to cast your vote online—fast.</p>
+        <div class="vote-now">
+            <a href="{% url 'vote' %}"><button class="btn">Vote Now</button></a>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="how-steps">
+            <div class="step">
+                <div class="icon">👤</div>
+                <h3>1. Register</h3>
+                <p>Create your account<br>and complete your KYC.</p>
             </div>
-            <div class="rightside">
-                <h1>VOTE!</h1>
-                <p>LET YOUR VOICE BE HEARD!</p>
-                <a href="{% url 'vote' %}"><button class="btn">Vote Now</button></a>
-            
+            <div class="step">
+                <div class="icon">✔️</div>
+                <h3>2. Verify</h3>
+                <p>Verify your identity<br>using our secure portal.</p>
             </div>
-        </section>
+            <div class="step">
+                <div class="icon">🗳️</div>
+                <h3>3. Vote</h3>
+                <p>Select your candidate<br>and cast your vote with a click.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-timer">
+        <div class="stats">
+            <h3>Live Voting Stats</h3>
+            <p><strong>5,120</strong><br>Registered Users</p>
+            <p><strong>3,245</strong><br>Votes Cast</p>
+        </div>
+        <div class="timer">
+            <h3>Time Left to Vote</h3>
+            <p><strong>3 Days 12 H 5 Minutes</strong></p>
+        </div>
+    </section>
+
+
     </main>
     <footer class="footer">
         <div class="footer-content">
@@ -128,5 +160,6 @@
     <script src="{% static 'myapp/js/profiledropdown.js' %}"></script>
     <script src="{% static 'myapp/js/navs.js' %}"></script>
     <script src="{%static 'myapp/js/alert.js' %}"> </script>
+    
 </body>
 </html>
