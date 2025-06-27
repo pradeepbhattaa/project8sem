@@ -180,6 +180,7 @@ h1 {
 }
 
 
+
 @media (max-width: 768px) {
     .candidate-card {
         width: calc(50% - 40px);
