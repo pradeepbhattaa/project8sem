@@ -8,7 +8,7 @@
 }
 
 body {
-    background-color: #f4f4f4;
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
     color: #333;
     margin: 0;
     padding: 0;
@@ -20,8 +20,8 @@ body {
 }
 
 .profiles-picture:hover {
-   cursor:pointer;
-   border:solid #34d8eb;
+    cursor: pointer;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
 }
 
 #profile-picture {
@@ -30,8 +30,8 @@ body {
     border-radius: 50%;
 }
 
-.profile-items:hover{
-    background: linear-gradient(57deg, #8cc2ed, #46a5f2);
+.profile-items:hover {
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
 }
 
 .user-full-name {
@@ -44,19 +44,19 @@ body {
     display: none;
     position: absolute;
     background-color: white;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     right: 10px;
     top: 70px;
 }
 .dropdown-menu a {
-    color: black;
+    color: #333;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
 }
 .dropdown-menu a:hover {
-    background-color: #ddd;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
 }
 
 header {
@@ -74,12 +74,11 @@ main {
     padding: 20px;
 }
 
-h1{
+h1 {
     text-align: center;
 }
 
 .vote-section {
-
     text-align: center;
     padding: 40px 20px;
 }
@@ -87,12 +86,11 @@ h1{
 .vote-section h1 {
     font-size: 36px;
     margin-bottom: 20px;
-    color: #003366;
+    color: #34d8eb; /* Changed to signup.css accent color */
 }
 
 .vote-container {
-   max-width: 800px;
-   
+    max-width: 800px;
     margin: auto;
     background-color: #fff;
     padding: 20px;
@@ -108,7 +106,7 @@ h1{
 .vote-group h2 {
     font-size: 24px;
     margin-bottom: 15px;
-    color: #00509e;
+    color: #34d8eb; /* Changed to signup.css accent color */
 }
 
 .candidate-list {
@@ -118,7 +116,7 @@ h1{
 }
 
 .candidate-card {
-    background-color: #f9f9f9;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -140,6 +138,7 @@ h1{
 .candidate-card h3 {
     font-size: 20px;
     margin: 10px 0;
+    color: #34d8eb; /* Changed to signup.css accent color */
 }
 
 .candidate-card p {
@@ -152,66 +151,57 @@ h1{
     margin: 10px 0;
 }
 
-.next-btn{
-    background-color: black;
-    color:white;
+.next-btn {
+    background-color: #34d8eb; /* Changed to signup.css accent */
+    color: white;
     padding: 10px;
     font-size: 20px;
-    border-radius:6px;
+    border-radius: 6px;
 }
 
-.next-btn:hover{
+.next-btn:hover {
     background-color: white;
-    color:black;
-    border-radius:12px;
-    cursor:pointer;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border-radius: 12px;
+    cursor: pointer;
 }
 
 .submit-kyc {
-
-    background-color: rgb(6, 92, 107);
-    color:rgb(243, 252, 246);
+    background-color: #34d8eb; /* Changed to signup.css accent */
+    color: white;
     padding: 10px;
     font-size: 18px;
-    border-radius:  12px;
+    border-radius: 12px;
     font-weight: 600;
-    border: 2px solid rgb(3, 56, 19); 
-
-
+    border: 2px solid #34d8eb; /* Changed to signup.css accent */
 }
 
-.kyc-button a{
+.kyc-button a {
     text-decoration: none;
 }
 
-
-
-
-
-.submit-kyc:hover{
+.submit-kyc:hover {
     background-color: white;
-    color:black;
-
-    border-radius:12px;
-    cursor:pointer;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border-radius: 12px;
+    cursor: pointer;
     transition: 0.5s;
 }
+
 .verification-message {
-    display:flex;
+    display: flex;
     justify-content: center;
     flex-direction: column;
-    gap:15px;
+    gap: 15px;
     max-width: 800px;
     margin: 20px auto;
-    background-color: rgba(7, 200, 168, 0.9);
+    background-color: rgba(52, 216, 235, 0.9); /* Adjusted to match signup.css accent */
     padding: 20px;
-    border: 1px solid #ffcccc;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
     border-radius: 10px;
     text-align: center;
     font-size: 20px;
-    
-    
-    color:black;
+    color: black;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -219,13 +209,13 @@ h1{
     margin: 0;
 }
 
-.kyc-message{
+.kyc-message {
     display: flex;
     justify-content: center;
 }
 
-.kyc-button{
-    display:flex;
+.kyc-button {
+    display: flex;
     justify-content: center;
 }
 
@@ -235,8 +225,6 @@ h1{
         font-size: 14px;
     }
 }
-
-
 
 @media (max-width: 768px) {
     .vote-container {

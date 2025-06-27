@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f4f4f4;
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
     color: #333;
     margin: 0;
     padding: 0;
@@ -19,12 +19,12 @@ body {
 
 .profile-picture:hover {
     cursor: pointer;
-    border: solid #34d8eb;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
     transform: scale(1.1);
 }
 
 .profile-items:hover {
-    background: linear-gradient(57deg, #8cc2ed, #46a5f2);
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
 }
 
 .user-full-name {
@@ -55,7 +55,7 @@ body {
 }
 
 .dropdown-menu a:hover {
-    background-color: #f0f0f0;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
 }
 
 header {
@@ -79,7 +79,7 @@ section.hero {
     align-items: center;
     width: 100%;
     height: 100vh;
-    background: linear-gradient(to bottom right, #ffffff 55%, #87CEEB 45%);
+    background: linear-gradient(to bottom right, #ffffff 55%, #34d8eb 45%); /* Changed to signup.css accent */
     padding: 20px;
     overflow: hidden;
 }
@@ -133,7 +133,7 @@ section.hero {
     font-weight: 600;
     color: #000;
     text-transform: uppercase;
-    background: linear-gradient(57deg, #34d8eb, #b1ebf2);
+    background: linear-gradient(57deg, #34d8eb, #b1ebf2); /* Changed to match signup.css button */
     border-radius: 25px;
     padding: 20px 60px;
     margin: 0 10px;
@@ -144,7 +144,7 @@ section.hero {
 }
 
 .rightside button:hover {
-    background: linear-gradient(57deg, #34d8eb, #5eb051);
+    background: linear-gradient(57deg, #34d8eb, #5eb051); /* Changed to match signup.css hover */
     transform: scale(1.05);
 }
 
@@ -180,7 +180,7 @@ section.hero {
 
     .rightside {
         padding-top: 100px;
-        background-color: rgba(135, 206, 235, 0.9);
+        background-color: rgba(52, 216, 235, 0.9); /* Changed to match signup.css accent */
     }
 
     .rightside button {
