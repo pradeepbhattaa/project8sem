@@ -165,6 +165,22 @@ h1 {
     background-color: #5eb051; /* Changed to match signup.css button hover */
 }
 
+.notice-description {
+    max-height: 60px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    transition: max-height 0.3s ease;
+}
+
+.candidate-details.expanded .notice-description {
+    max-height: 1000px; /* or something very big */
+    -webkit-line-clamp: unset;
+}
+
+
+
 @media (max-width: 768px) {
     .candidate-card {
         width: calc(50% - 40px);
