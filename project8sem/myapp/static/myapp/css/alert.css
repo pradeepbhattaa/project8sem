@@ -1,36 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 .alert {
-    padding: 20px;
-    background-color: #f44336; /* Red */
+    font-family: 'Poppins', sans-serif;
+    padding: 18px 24px;
+    background: linear-gradient(57deg, #f44336, #ff6b6b); /* default red alert */
     color: white;
     margin-bottom: 15px;
     position: fixed;
-    font-weight: bold;
-    font-size: 18px;
-    
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 2000;
-    width: 80%;
-    max-width: 500px;
-    box-sizing: border-box;
+    width: 90%;
+    max-width: 480px;
     text-align: center;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    transition: all 0.4s ease;
 }
-.alert.success {background-color: #049a09;} /* Green */
-.alert.error {background-color: #f44336;} /* Red */
+
+.alert.success {
+    background: linear-gradient(57deg, #34d8eb, #5eb051); /* Blue to green */
+}
+
+.alert.error {
+    background: linear-gradient(57deg, #f44336, #ff6b6b); /* Red gradient */
+}
+
 .closebtn {
     margin-left: 15px;
     color: white;
-    font-weight: bold;
+    font-weight: 700;
     float: right;
-    font-size: 22px;
+    font-size: 20px;
     line-height: 20px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: color 0.3s ease;
 }
+
 .closebtn:hover {
-    color: black;
+    color: #000;
 }

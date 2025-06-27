@@ -1,38 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-
-
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap');
 
 body {
-    font-family: 'Poppins';
-
+    font-family: 'Poppins', sans-serif;
     background-color: #f4f4f4;
     color: #333;
     margin: 0;
     padding: 0;
+    scroll-behavior: smooth;
 }
 
-.profile-picture {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-}
-
-.profile-picture:hover {
-   cursor:pointer;
-   border:solid #34d8eb;
-}
-
+.profile-picture,
 #profile-picture {
     width: 50px;
     height: 50px;
     border-radius: 50%;
+    transition: all 0.3s ease;
 }
 
-.profile-items:hover{
+.profile-picture:hover {
+    cursor: pointer;
+    border: solid #34d8eb;
+    transform: scale(1.1);
+}
+
+.profile-items:hover {
     background: linear-gradient(57deg, #8cc2ed, #46a5f2);
 }
-
 
 .user-full-name {
     margin-right: 20px;
@@ -43,29 +36,37 @@ body {
 .dropdown-menu {
     display: none;
     position: absolute;
-    background-color: white;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     z-index: 1;
     right: 10px;
     top: 70px;
+    border-radius: 10px;
+    overflow: hidden;
 }
+
 .dropdown-menu a {
-    color: black;
+    color: #333;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
+    transition: background-color 0.3s ease;
 }
+
 .dropdown-menu a:hover {
-    background-color: #ddd;
+    background-color: #f0f0f0;
 }
+
 header {
     background-color: #fff;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
+    transition: all 0.3s ease;
 }
 
 main {
@@ -80,6 +81,7 @@ section.hero {
     height: 100vh;
     background: linear-gradient(to bottom right, #ffffff 55%, #87CEEB 45%);
     padding: 20px;
+    overflow: hidden;
 }
 
 .leftside {
@@ -87,16 +89,18 @@ section.hero {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-right: px;
     margin-bottom: 200px;
 }
 
 .leftside img {
-    transform: scale(3.35); /* Scale the image to be 3 times larger */
+    transform: scale(3.2);
     max-width: 100%;
-    
     height: auto;
-    margin-right: 20px; /* Ensure the image does not exceed the white section */
+    transition: transform 0.3s ease;
+}
+
+.leftside img:hover {
+    transform: scale(3.3);
 }
 
 .rightside {
@@ -104,40 +108,44 @@ section.hero {
     color: white;
     text-align: center;
     padding: 40px;
-    padding-top: 300px; /* Adjust to bring content downwards */
-    margin-left: -60px; /* Adjust to bring content closer to the blue section */
+    padding-top: 300px;
+    margin-left: -60px;
 }
 
 .rightside h1 {
-    color: #ffffff;
-    font-size: 50px;
+    font-size: 56px;
     font-weight: 900;
+    color: #ffffff;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .rightside p {
-    font-size: 1.9rem;
+    font-size: 1.8rem;
     padding: 30px 0;
+    color: #f1f1f1;
+    font-weight: 400;
 }
 
 .rightside button {
     font-size: 17px;
     font-weight: 600;
-    color: black;
+    color: #000;
     text-transform: uppercase;
-    background: linear-gradient(57deg, #34d8eb, #b1ebf2);/* blue:#34d8eb*/
+    background: linear-gradient(57deg, #34d8eb, #b1ebf2);
     border-radius: 25px;
     padding: 20px 60px;
     margin: 0 10px;
     border: none;
     cursor: pointer;
-   
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 15px rgba(52, 216, 235, 0.3);
 }
 
 .rightside button:hover {
-    background: linear-gradient(57deg, #34d8eb,#5eb051);
+    background: linear-gradient(57deg, #34d8eb, #5eb051);
     transform: scale(1.05);
-    
 }
 
 .rightside button:active {
@@ -154,27 +162,27 @@ section.hero {
         top: 60px;
         left: 0;
     }
-    
+
     .hero {
         flex-direction: column;
         justify-content: center;
     }
-    
-    .leftside, .rightside {
+
+    .leftside,
+    .rightside {
         width: 100%;
         padding: 20px;
     }
-    
+
     .leftside img {
-        transform: scale(3); /* Adjust the scale for smaller screens */
+        transform: scale(2.5);
     }
-    
+
     .rightside {
-        background-color: rgba(135, 206, 235, 0.9); /* Ensure the background is blue */
-        text-align: center; /* Center the text on smaller screens */
-        
+        padding-top: 100px;
+        background-color: rgba(135, 206, 235, 0.9);
     }
-    
+
     .rightside button {
         width: 100%;
         margin: 10px 0;
