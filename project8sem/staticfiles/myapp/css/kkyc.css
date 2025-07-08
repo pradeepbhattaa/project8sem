@@ -1,0 +1,223 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+body {
+    font-family: 'Poppins';
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
+    margin: 0;
+    padding: 0;
+}
+
+.profiles-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profiles-picture:hover {
+    cursor: pointer;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
+}
+
+#profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profile-items:hover {
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
+}
+
+.user-full-name {
+    margin-right: 20px;
+    font-weight: 550;
+    font-size: 20px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 10px;
+    top: 70px;
+}
+.dropdown-menu a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+.dropdown-menu a:hover {
+    background-color: #ddd;
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto 20px;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #34d8eb; /* Changed to signup.css border color */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 5px;
+    border-bottom: none;
+}
+
+.section1 {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 5px;
+    border-bottom: none;
+}
+
+.kyc-header {
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.titleform {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.errorlabel {
+    display: flex;
+    gap: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.input-box {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 45%;
+    gap: 0.7rem;
+    margin: 1rem 0;
+    margin-right: 25px;
+}
+
+label {
+    margin-bottom: 5px;
+    font-weight: 550;
+}
+
+.input-box input, select {
+    height: 2.5rem;
+    font-size: 1rem;
+    padding: 0 1rem;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 4px;
+}
+
+.error-message {
+    color: #e74c3c; /* Match signup.css error color */
+    font-size: 0.8rem;
+    display: none;
+}
+
+.middle-label {
+    display: flex;
+}
+
+.optional {
+    font-size: 12px;
+    color: #888;
+}
+
+.gender-container {
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+    margin: 0;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-top: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+input[type="radio"] {
+    margin-right: 10px;
+}
+
+.upload-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.upload-box {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 45%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 5px;
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+    text-align: center;
+}
+
+h2 {
+    font-size: 16px;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.sectiondiv {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+button {
+    margin-top: 10px;
+    background: linear-gradient(57deg, #34d8eb, #b1ebf2); /* Changed to match signup.css button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background: linear-gradient(57deg, #34d8eb, #5eb051); /* Changed to match signup.css hover */
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .upload-box {
+        max-width: 100%;
+        margin-bottom: 10px;
+    }
+    .container {
+        padding: 15px;
+    }
+}

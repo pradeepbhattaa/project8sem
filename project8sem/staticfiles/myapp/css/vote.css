@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/* Reset some default styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins';
+}
+
+body {
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+.profiles-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profiles-picture:hover {
+    cursor: pointer;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
+}
+
+#profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profile-items:hover {
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
+}
+
+.user-full-name {
+    margin-right: 20px;
+    font-weight: 550;
+    font-size: 20px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    right: 10px;
+    top: 70px;
+}
+.dropdown-menu a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+.dropdown-menu a:hover {
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+}
+
+header {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+main {
+    padding-top: 80px;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.vote-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.vote-section h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.vote-container {
+    max-width: 800px;
+    margin: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vote-group {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.vote-group h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.candidate-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.candidate-card {
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: center;
+    flex: 1 1 calc(40% - 20px);
+    max-width: calc(40% - 20px);
+}
+
+.candidate-card img {
+    margin-top: 25px;
+    width: 200px;
+    height: 200px;
+}
+
+.candidate-card .details {
+    padding: 15px;
+}
+
+.candidate-card h3 {
+    font-size: 20px;
+    margin: 10px 0;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.candidate-card p {
+    font-size: 16px;
+    margin: 5px 0;
+    color: #555;
+}
+
+.candidate-card .radio-button {
+    margin: 10px 0;
+}
+
+.next-btn {
+    background-color: #34d8eb; /* Changed to signup.css accent */
+    color: white;
+    padding: 10px;
+    font-size: 20px;
+    border-radius: 6px;
+}
+
+.next-btn:hover {
+    background-color: white;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.submit-kyc {
+    background-color: #34d8eb; /* Changed to signup.css accent */
+    color: white;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    border: 2px solid #34d8eb; /* Changed to signup.css accent */
+}
+
+.kyc-button a {
+    text-decoration: none;
+}
+
+.submit-kyc:hover {
+    background-color: white;
+    color: #34d8eb; /* Changed to signup.css accent */
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.verification-message {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 800px;
+    margin: 20px auto;
+    background-color: rgba(52, 216, 235, 0.9); /* Adjusted to match signup.css accent */
+    padding: 20px;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 10px;
+    text-align: center;
+    font-size: 20px;
+    color: black;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.verification-message p {
+    margin: 0;
+}
+
+.kyc-message {
+    display: flex;
+    justify-content: center;
+}
+
+.kyc-button {
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .verification-message {
+        padding: 15px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .vote-container {
+        padding: 10px;
+    }
+
+    .vote-group h2 {
+        font-size: 20px;
+    }
+
+    .candidate-list {
+        flex-direction: column;
+    }
+
+    .candidate-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .candidate-card h3 {
+        font-size: 18px;
+    }
+
+    .candidate-card p {
+        font-size: 14px;
+    }
+
+    .candidate-card .radio-button {
+        font-size: 14px;
+    }
+}

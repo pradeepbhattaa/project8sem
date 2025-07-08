@@ -60,9 +60,7 @@ def kyc_photo_path(instance, filename):
 
 
 class KycRegistration(models.Model):
-   
     email = models.EmailField()
-    
     citizenship_number = models.CharField(max_length=20)
     voter_id = models.CharField(max_length=20)
     gender = models.CharField(max_length=10, choices=[
@@ -79,7 +77,8 @@ class KycRegistration(models.Model):
     photo_voter = models.ImageField(upload_to=kyc_photo_path)
     photo_citizenship_front = models.ImageField(upload_to=kyc_photo_path)
     photo_citizenship_back = models.ImageField(upload_to=kyc_photo_path)
-
+    face_coordinates = models.JSONField(null=True, blank=True)  # Added for facial coordinates
+    face_descriptor = models.JSONField(null=True, blank=True)
     class Meta:
         db_table = 'kycregistration'
 
@@ -193,9 +192,11 @@ def profile_picture_path(instance, filename):
 
 
 class ProfilePicture(models.Model):
+    
 
-    email = models.EmailField()
-    photo_front = models.ImageField(upload_to=profile_picture_path)
+    email = models.EmailField(unique=True)
+    photo_front = models.ImageField(upload_to=kyc_photo_path)
+
 
     class Meta:
         db_table='profilepicture'
@@ -215,54 +216,50 @@ class VoteStatus(models.Model):
     def __str__(self):
         return self.email
     
-
 class MpVote(models.Model):
-    email = models.EmailField(max_length=254, unique=True)
+    voter_email = models.EmailField(null=True, blank=True)  
+    candidate_email = models.EmailField(null=True, blank=True)
     district = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table='Mpvote'
-
-    def __str__(self):
-        return f'{self.email} - {self.district}'
-    
+        db_table = 'Mpvote'
+        unique_together = ('voter_email',)
 
 class MayorVote(models.Model):
-    email = models.EmailField(max_length=254, unique=True)
+    voter_email = models.EmailField(max_length=254, unique=True)  # voter_email for the voter (unique)
+    candidate_email = models.EmailField(null=True, blank=True)
     municipality = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table='Mayourvote'
+        db_table = 'Mayourvote'
 
     def __str__(self):
-        return f'{self.email} - {self.municipality}'
-    
+        return f'{self.voter_email} - {self.municipality}'
+
 
 class DeputymayorVote(models.Model):
-    email = models.EmailField(max_length=254, unique=True)
+    voter_email = models.EmailField(max_length=254, unique=True)
+    candidate_email = models.EmailField(null=True, blank=True)
     municipality = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table='Deputyvote'
+        db_table = 'Deputyvote'
 
     def __str__(self):
-        return f'{self.email} - {self.municipality}'
-    
+        return f'{self.voter_email} - {self.municipality}'
+
+
 class WardVote(models.Model):
-    email = models.EmailField(max_length=254, unique=True)
+    voter_email = models.EmailField(max_length=254, unique=True)
+    candidate_email = models.EmailField(null=True, blank=True)
     wardno = models.CharField(max_length=50)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table='Wardvote'
+        db_table = 'Wardvote'
 
     def __str__(self):
-        return f'{self.email} - Ward {self.wardno}'
-
-
-
-
-
+        return f'{self.voter_email} - Ward {self.wardno}'

@@ -1,0 +1,144 @@
+body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #d4f7ff, #f9fdff);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        main {
+            padding-top: 80px;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            text-align: center;
+            padding: 80px 20px 30px 20px;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #0b2c48;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .vote-now .btn {
+            margin-top: 30px;
+            background: #0b2c48;
+            color: #fff;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .vote-now .btn:hover {
+            background: #14395a;
+            transform: scale(1.05);
+        }
+
+        /* How It Works */
+        .how-it-works {
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #0b2c48;
+        }
+
+        .how-steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            width: 200px;
+            padding: 20px;
+            background: #f2faff;
+            border-radius: 15px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
+        }
+
+        .step .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .step h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #0b2c48;
+        }
+
+        .step p {
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        /* Stats & Timer */
+        .stats-timer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 80px;
+            flex-wrap: wrap;
+            text-align: center;
+            margin: 50px 20px;
+            
+        }
+
+        .stats h3,
+        .timer h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0b2c48;
+            margin-bottom: 10px;
+        }
+
+        .stats p,
+        .timer p {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .stats p strong,
+        .timer p strong {
+            font-size: 1.5rem;
+            color: #0b2c48;
+        }
+
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .how-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats-timer {
+                flex-direction: column;
+                align-items: center;
+                gap: 40px;
+            }
+
+          
+        }

@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'myapp/css/nav.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/kkyc.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
-
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
 </head>
 <body>
 
@@ -197,15 +197,32 @@
             <h3>Upload Photo</h3>
             <div class="section1">
                 <div class="upload-section">
+                    <!-- ⬇‑‑ replace ONLY this upload‑box -->
                     <div class="upload-box">
-                        <h2>Passport-Size Photo</h2>
-                        <div>Drag your file here or click here to upload</div>
-                        <input type="file" id="fileInputFront" name="photo_front" accept="image/*" required>
+                    <h2>Passport‑Size Photo</h2>
+                    <div>Drag your file here or click here to upload</div>
+
+                    <!-- use detectFaceDescriptor, not detectFaceCoordinates -->
+                    <input  type="file"
+                            id="fileInputFront"
+                            name="photo_front"
+                            accept="image/*"
+                            required
+                            onchange="detectFaceDescriptor(this, 'face-descriptor', 'photo-front-preview')">
+
+                    <img  id="photo-front-preview"
+                            style="display:none;max-width:200px;margin-top:10px;" />
+
+                    <!-- NEW hidden input that will hold the descriptor -->
+                    <input type="hidden" id="face-descriptor" name="face_descriptor">
                     </div>
+
                     <div class="upload-box">
                         <h2>Voter-ID</h2>
                         <div>Drag your file here or click here to upload</div>
                         <input type="file" id="fileInputVoterID" name="photo_voter" accept="image/*" required>
+                        <img  id="photo-front-preview"
+                            style="display:none;max-width:200px;margin-top:10px;" />
                     </div>
                 </div>
                 <div class="upload-section">
@@ -213,11 +230,15 @@
                         <h2>Citizenship Photo (Front)</h2>
                         <div>Drag your file here or click here to upload</div>
                         <input type="file" id="fileInputCitizenshipFront" name="photo_citizenship_front" accept="image/*" required>
+                        <img  id="photo-front-preview"
+                            style="display:none;max-width:200px;margin-top:10px;" />
                     </div>
                     <div class="upload-box">
                         <h2>Citizenship Photo (Back)</h2>
                         <div>Drag your file here or click here to upload</div>
                         <input type="file" id="fileInputCitizenshipBack" name="photo_citizenship_back" accept="image/*" required>
+                        <img  id="photo-front-preview"
+                            style="display:none;max-width:200px;margin-top:10px;" />
                     </div>
                 </div>
             </div>
@@ -235,11 +256,33 @@
 
 
 
+
+<script src="{% static 'myapp/js/face_detection.js' %}"></script>
 <script src="{% static 'myapp/js/alert.js' %}"></script>
 <script src="{% static 'myapp/js/kycvalidation.js' %}"></script>
 <script src="{% static 'myapp/js/kkyc.js' %}"></script>
 <script src="{% static 'myapp/js/navs.js' %}"></script>
 <script src="{% static 'myapp/js/profilesdropdown.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const modelsLoaded = await loadFaceApiModels();
+                if (!modelsLoaded) {
+                    const fileInput = document.getElementById('fileInputFront');
+                    if (fileInput) {
+                        fileInput.disabled = true;
+                        fileInput.title = 'Face detection library not loaded. Please refresh the page.';
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing face detection:', error.message);
+                alert('Failed to initialize face detection. Please try again later.');
+                const fileInput = document.getElementById('fileInputFront');
+                if (fileInput) fileInput.disabled = true;
+            }
+       
+    });
+</script>
 
 </body>
 </html>

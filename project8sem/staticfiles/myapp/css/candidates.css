@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/* Reset some default styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins';
+}
+
+body {
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+main {
+    padding-top: 80px;
+}
+
+.profiles-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profiles-picture:hover {
+    cursor: pointer;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
+}
+
+#profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profile-items:hover {
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
+}
+
+.user-full-name {
+    margin-right: 20px;
+    font-weight: 550;
+    font-size: 20px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    right: 10px;
+    top: 70px;
+}
+.dropdown-menu a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+.dropdown-menu a:hover {
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+}
+
+.candidate-section {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.candidate-section h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.candidate-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.candidate-card {
+    background-color: #fff;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    padding: 20px;
+    width: calc(25% - 40px);
+    max-width: 300px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.candidate-card img {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 15px;
+}
+
+.candidate-card h3 {
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.candidate-card p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.vote-btn {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #34d8eb; /* Changed to signup.css accent */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.vote-btn:hover {
+    background-color: #5eb051; /* Changed to match signup.css button hover */
+}
+
+.candidates-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.candidate-card {
+    background-color: white;
+    border: 1px solid #34d8eb; /* Changed to signup.css accent */
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 300px;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-picture {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.candidate-details {
+    padding: 15px;
+    flex-grow: 1;
+}
+
+.candidate-details h2 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #34d8eb; /* Changed to signup.css accent color */
+}
+
+.candidate-details p {
+    margin: 5px 0;
+    color: #666;
+}
+
+.more-info-btn {
+    background-color: #34d8eb; /* Changed to signup.css accent */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.more-info-btn:hover {
+    background-color: #5eb051; /* Changed to match signup.css button hover */
+    color: white;
+    transition: 0.5s;
+}
+
+@media (max-width: 768px) {
+    .candidate-card {
+        width: calc(50% - 40px);
+    }
+}
+
+@media (max-width: 576px) {
+    .candidate-card {
+        width: calc(100% - 40px);
+    }
+}

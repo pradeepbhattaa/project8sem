@@ -1,0 +1,95 @@
+/* static/myapp/css/view_user.css */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+.user-table thead tr {
+    background-color: navy;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+}
+
+.user-table th, .user-table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: right;
+}
+
+.user-table tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.user-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.user-table tbody tr:last-of-type {
+    border-bottom: 2px solid #343a40;
+}
+
+
+.notice_img{
+
+    height: 60px;
+    width: 60px;
+
+}
+
+/* Media query for card layout */
+@media screen and (max-width: 1141px) {
+    .user-table {
+        border: 0;
+        padding-left: 10px;
+    }
+
+    .user-table thead {
+        text-align: left;
+        display: none;
+        padding-left: 10px;
+    }
+
+    .user-table tbody, .user-table tr, .user-table td {
+        display: block;
+        width: 100%;
+        padding-left: 10px;
+        
+    }
+
+    .user-table tr {
+        margin-bottom: 15px;
+        border-bottom: 2px solid #ddd;
+        box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        padding-left: 10px;
+        text-align: left;
+    }
+
+    .user-table td {
+        text-align: center;
+        padding-left: 50%;
+        position: relative;
+        padding-left: 10px;
+        text-align: right;
+    }
+
+    .user-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        width: 50%;
+        padding-right: 10px;
+        text-align: left;
+        font-weight: bold;
+        padding-left: 10px;
+        
+    }
+
+    .user-table tbody tr:last-of-type {
+        border-bottom: 0;
+        
+    }
+}

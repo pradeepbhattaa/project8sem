@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle at top left, #e0faff, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Soft blue glowing background blobs */
+body::before,
+body::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    opacity: 0.2;
+    filter: blur(100px);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+body::before {
+    width: 500px;
+    height: 500px;
+    background: #34d8eb;
+    top: 25%;
+    left: 10%;
+}
+
+body::after {
+    width: 600px;
+    height: 600px;
+    background: #b1ebf2;
+    bottom: 5%;
+    right: 5%;
+}
+
+.container {
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+    background-color: white;
+    width: 90%;
+    max-width: 400px;
+    padding: 30px 25px;
+    border-radius: 16px;
+    border: 2px solid #34d8eb;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #34d8eb;
+}
+
+.input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.input-box label {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.input-box input {
+    height: 3rem;
+    font-size: 1rem;
+    padding: 0 1rem;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border 0.3s ease;
+}
+
+.input-box input:focus {
+    border: 2px solid #34d8eb;
+    outline: none;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8rem;
+    display: none;
+}
+
+.optional {
+    font-size: 12px;
+    color: #888;
+}
+
+.next-btn {
+    height: 3rem;
+    color: #000;
+    font-weight: 600;
+    font-size: 17px;
+    background: linear-gradient(57deg, #34d8eb, #b1ebf2);
+    border: none;
+    text-align: center;
+    border-radius: 25px;
+    box-shadow: 0px 4px 15px rgba(52, 216, 235, 0.3);
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    cursor: pointer;
+}
+
+.next-btn:hover {
+    background: linear-gradient(57deg, #34d8eb, #5eb051);
+    transform: scale(1.05);
+}
+
+.back-btn {
+    color: #34d8eb;
+    font-weight: 500;
+    text-align: center;
+    display: inline-block;
+    margin-top: 10px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+    color: #1e78c1;
+    cursor: pointer;
+}
+
+.section {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+.step-indicator {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.step-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 5px;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.step-circle.active {
+    background-color: #34d8eb;
+}
+
+@media screen and (max-width: 500px) {
+    .container {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .register, .reset-password {
+        font-size: 13px;
+    }
+}

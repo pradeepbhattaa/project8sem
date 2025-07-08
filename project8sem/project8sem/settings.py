@@ -154,3 +154,5 @@ EMAIL_USE_TLS = True
 
 # Set session to expire when the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

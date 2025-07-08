@@ -137,6 +137,7 @@ urlpatterns = [
 
 
                        path('user_logout/',views.user_logout,name="user_logout"),
+                       path('verify_face/', views.verify_face, name='verify_face'),
 
 
 

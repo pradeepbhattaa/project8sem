@@ -1,0 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #e0faff; /* Changed to match signup.css gradient base */
+    color: #333;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+
+.profile-picture,
+#profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.profile-picture:hover {
+    cursor: pointer;
+    border: solid #34d8eb; /* Changed to signup.css accent color */
+    transform: scale(1.1);
+}
+
+.profile-items:hover {
+    background: linear-gradient(57deg, #8cc2ed, #34d8eb); /* Adjusted to match signup.css gradient style */
+}
+
+.user-full-name {
+    margin-right: 20px;
+    font-weight: 550;
+    font-size: 20px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    right: 10px;
+    top: 70px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.dropdown-menu a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f0f8ff; /* Changed to lighter tone matching signup.css */
+}
+
+header {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+main {
+    padding-top: 80px;
+}
+ .welcome-section {
+            text-align: center;
+            padding: 80px 20px 30px 20px;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #0b2c48;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .vote-now .btn {
+            margin-top: 30px;
+            background: #0b2c48;
+            color: #fff;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .vote-now .btn:hover {
+            background: #14395a;
+            transform: scale(1.05);
+        }
+
+        /* How It Works */
+        .how-it-works {
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #0b2c48;
+        }
+
+        .how-steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            width: 200px;
+            padding: 20px;
+            background: #f2faff;
+            border-radius: 15px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
+        }
+
+        .step .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .step h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #0b2c48;
+        }
+
+        .step p {
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        /* Stats & Timer */
+        .stats-timer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 80px;
+            flex-wrap: wrap;
+            text-align: center;
+            margin: 50px 20px;
+            
+        }
+
+        .stats h3,
+        .timer h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0b2c48;
+            margin-bottom: 10px;
+        }
+
+        .stats p,
+        .timer p {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .stats p strong,
+        .timer p strong {
+            font-size: 1.5rem;
+            color: #0b2c48;
+        }
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background-color: #fff;
+        position: absolute;
+        top: 60px;
+        left: 0;
+    }
+      .how-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats-timer {
+                flex-direction: column;
+                align-items: center;
+                gap: 40px;
+            }
+
+}
