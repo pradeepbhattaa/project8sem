@@ -17,30 +17,48 @@
                 <div class="menu-icon" onclick="openNav()">&#9776;</div>
                 <div class="logo"><img src="{% static 'myapp/images/logo.jpg' %}" alt="Logo" class="circular-logo"></div>
             </div>
-            <div class="nav-center" id="navLinks">
+ <div class="nav-center" id="navLinks">
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'candidates' %}">Candidates</a>
+                    <a href="{% url 'notices' %}">Notices</a>
+                    <a href="{% url 'vote' %}">Vote Here</a>
+                    <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+                    <a href="{% url 'resultuser' %}">Results</a>
+                    <a href="{% url 'contact' %}">Contact</a>
+                </div>
+                <div class="nav-right">
+                    {% if user_full_name %}
+                    <span class="user-full-name">{{ user_full_name }}</span>
+                    {% if user_profile_picture %}
+                    <img src="{{user_profile_picture }}" alt="Profile Picture" class="profiles-picture"
+                        onclick="toggleDropdown()">
+                    {% else %}
+                    <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture"
+                        onclick="toggleDropdown()">
+                    {% endif %}
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+                        <a href="{% url 'user_logout' %}">Logout</a>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
+
+        <div class="side-menu" id="sideMenu">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <div id="sideNavLinks">
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'candidates' %}">Candidates</a>
                 <a href="{% url 'notices' %}">Notices</a>
                 <a href="{% url 'vote' %}">Vote Here</a>
                 <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+                <a href="{% url 'resultuser' %}">Results</a>
                 <a href="{% url 'contact' %}">Contact</a>
             </div>
-            <div class="nav-right">
-                {% if user_full_name %}
-                    <span class="user-full-name">{{ user_full_name }}</span>
-                    {% if user_profile_picture %}
-                        <img src="{{ user_profile_picture }}" alt="Profile Picture" class="profiles-picture" onclick="toggleDropdown()">
-                    {% else %}
-                    <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture" onclick="toggleDropdown()">
-                    {% endif %}
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="{% url 'edit_profile' %}" class="profile-items">Edit Profile</a>
-                        <a href="{% url 'user_logout' %}" class="profile-items">Logout</a>
-                    </div>
-                {% else %}
-                    <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
-                {% endif %}
-            </div>
+        </div>
         </nav>
     </header>
     <div class="side-menu" id="sideMenu">

@@ -10,10 +10,7 @@ from .models import Kycverified
 from .models import KycRequest
 from .models import KycRejected
 from .models import ProfilePicture
-from .models import MpVote
-from .models import MayorVote
-from .models import DeputymayorVote
-from .models import WardVote
+
 from .models import VoteStatus
 
 
@@ -33,10 +30,7 @@ admin.site.register(Kycverified)
 admin.site.register(KycRequest)
 admin.site.register(KycRejected)
 admin.site.register(ProfilePicture)
-admin.site.register(MpVote)
-admin.site.register(MayorVote)
-admin.site.register(DeputymayorVote)
-admin.site.register(WardVote)
+
 admin.site.register(VoteStatus)
 
 

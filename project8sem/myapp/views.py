@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import CandidateProfile, VoteStatus, MpVote, MayorVote, DeputymayorVote, KycRequest, UserProfile, KycRegistration, ProfilePicture, Test, UserRegistration, Notice, Kycverified, KycRejected, WardVote, EmailVerification
+from .models import CandidateProfile, VoteStatus,  KycRequest, UserProfile, KycRegistration, ProfilePicture, Test, UserRegistration, Notice, Kycverified, KycRejected, EmailVerification
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django.utils import timezone
@@ -14,9 +14,16 @@ from django.db.models import Count
 from io import BytesIO
 import base64
 from datetime import date
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from django.conf import settings
 import os
+
+
+
+
+
 def register_user(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -51,7 +58,7 @@ def login(request):
                 request.session['admin_id'] = admin.id
                 request.session['email'] = admin.email
                 messages.success(request, 'You Are Logged In')
-                return redirect('base')
+                return redirect('dashboard')
             else:
                 messages.error(request, 'Invalid email or password.')
         except Test.DoesNotExist:
@@ -61,6 +68,11 @@ def login(request):
 def adminlogout(request):
     request.session.flush()
     return render(request, 'myapp/admin_login.html')
+
+
+
+
+
 
 def userlogin(request):
     if request.method == 'POST':
@@ -86,6 +98,19 @@ def userlogin(request):
 def base(request):
     if not request.session.get('admin_verified'):
         return redirect('login')
+    graph = candidate_by_party()  # Call the helper function to get the graph data
+    user_age_graph = user_age_distribution()
+    candidate_age_graph = candidate_age_distribution()
+    user_province_piechart = userprovince_piechart()
+    user_gender_piechart= usergender_piechart()
+    context = {
+        'graph': graph,
+        'user_age_graph':user_age_graph,
+        'candidate_age_graph':candidate_age_graph,
+        'user_province_piechart':user_province_piechart,
+        'user_gender_piechart':user_gender_piechart,
+    }
+
     return render(request, 'myapp/base.html')
 
 def hello(request):
@@ -384,65 +409,94 @@ def notices(request):
         'user_profile_picture': user_profile_picture,
         'user_full_name': user_full_name,
     })
-# views.py  – replace the whole verify_kyc view with this version
-from django.shortcuts import redirect, render
+
 from django.contrib import messages
 import json
 from .models import (
     UserProfile, ProfilePicture, KycRequest,
     KycRegistration,
 )
+from django.shortcuts import redirect, render, get_object_or_404
+
+from django.conf import settings
+from web3 import Web3 # Make sure web3 is imported
+
+
+
 
 def verify_kyc(request):
     if not request.session.get('user_verified'):
         return redirect('userlogin')
 
     emailuser = request.session.get('email')
-    user = UserProfile.objects.get(email=emailuser)
+    user = get_object_or_404(UserProfile, email=emailuser)
 
-    # already submitted?
+    # Check if already submitted? You might want to check for 'is_accepted' status too
+    # If a record exists for this user, they've submitted, so redirect them.
     if KycRegistration.objects.filter(email=emailuser).exists():
-        messages.success(request, 'Your KYC has already been submitted')
-        return redirect('vote')
+        messages.success(request, 'Your KYC has already been submitted and is awaiting verification.')
+        # Redirect to a status page or home, not necessarily 'vote' if it's pending admin approval
+        return redirect('home') 
 
-    user_full_name        = f"{user.first_name} {user.last_name}"
-    user_profile_picture  = ProfilePicture.objects.filter(email=emailuser).first()
+    user_full_name = f"{user.first_name} {user.last_name}"
+    user_profile_picture = ProfilePicture.objects.filter(email=emailuser).first()
 
     if request.method == 'POST':
         # ------------------------------------------------------------------ #
-        #                    1.  PLAIN FORM FIELDS                            #
+        #                         1. PLAIN FORM FIELDS                       #
         # ------------------------------------------------------------------ #
-        email              = request.POST.get('email')
+        email = request.POST.get('email')
         citizenship_number = request.POST.get('citizenship_number')
-        voter_id           = request.POST.get('voter_id')
-        gender             = request.POST.get('gender')
-        country            = request.POST.get('country')
-        province           = request.POST.get('province')
-        district           = request.POST.get('district')
-        municipality       = request.POST.get('municipality')
-        ward_no            = request.POST.get('ward_no')
+        voter_id = request.POST.get('voter_id')
+        gender = request.POST.get('gender')
+        country = request.POST.get('country')
+        province = request.POST.get('province')
+        district = request.POST.get('district')
+        publicaddress = request.POST.get('publicaddress') # This is the public address from the form
+        municipality = request.POST.get('municipality')
+        ward_no = request.POST.get('ward_no')
 
         # ------------------------------------------------------------------ #
-        #                    2.  FILE UPLOADS                                 #
+        #                         2. FILE UPLOADS                            #
         # ------------------------------------------------------------------ #
-        photo_front             = request.FILES.get('photo_front')
-        photo_voter             = request.FILES.get('photo_voter')
+        photo_front = request.FILES.get('photo_front')
+        photo_voter = request.FILES.get('photo_voter')
         photo_citizenship_front = request.FILES.get('photo_citizenship_front')
-        photo_citizenship_back  = request.FILES.get('photo_citizenship_back')
+        photo_citizenship_back = request.FILES.get('photo_citizenship_back')
 
         # ------------------------------------------------------------------ #
-        #                    3.  FACE DESCRIPTOR (hidden input)               #
+        #                         3. FACE DESCRIPTOR & HASH                  #
         # ------------------------------------------------------------------ #
-        raw_descriptor = request.POST.get('face_descriptor')  # hidden input name
-        try:
-            face_descriptor = json.loads(raw_descriptor) if raw_descriptor else None
-        except json.JSONDecodeError:
-            messages.error(request, 'Face descriptor is not valid JSON.')
-            return redirect('verify_kyc')
+        raw_descriptor_json_str = request.POST.get('face_descriptor') # hidden input name from frontend
+        
+        # Initialize variables
+        face_descriptor_data = None # This will store the JSON array
+        computed_descriptor_hash = "" # This will store the Keccak-256 hash (as hex string)
+
+        if raw_descriptor_json_str:
+            try:
+                face_descriptor_data = json.loads(raw_descriptor_json_str)
+                # Convert the JSON array to a canonical string representation for hashing
+                descriptor_string_for_hash = json.dumps(face_descriptor_data, separators=(',', ':'), sort_keys=True) 
+                # ^ sort_keys=True ensures consistent string for hashing if order might vary
+                
+                # Compute Keccak-256 hash using web3
+                w3_instance = Web3() # No provider needed for just keccak
+                computed_descriptor_hash = w3_instance.keccak(text=descriptor_string_for_hash).hex()
+                
+                print(f"Computed face descriptor hash: {computed_descriptor_hash}") # Debug print
+                
+            except json.JSONDecodeError:
+                messages.error(request, 'Face descriptor is not valid JSON.')
+                return redirect('verify_kyc')
+            except Exception as e:
+                messages.error(request, f'Error processing face descriptor: {e}')
+                return redirect('verify_kyc')
 
         # ------------------------------------------------------------------ #
-        #                    4.  KYC REQUEST LOG                              #
+        #                         4. KYC REQUEST LOG (Optional, depends on your flow)
         # ------------------------------------------------------------------ #
+        # This seems to be a separate log for initial request, keep if you need it.
         KycRequest.objects.update_or_create(
             email=email,
             defaults={
@@ -453,8 +507,9 @@ def verify_kyc(request):
         )
 
         # ------------------------------------------------------------------ #
-        #                    5.  PROFILE PICTURE                              #
+        #                         5. PROFILE PICTURE (Optional, depends on your flow)
         # ------------------------------------------------------------------ #
+        # This seems to be updating ProfilePicture model. Keep if intended.
         if photo_front:
             ProfilePicture.objects.update_or_create(
                 email=email,
@@ -462,8 +517,9 @@ def verify_kyc(request):
             )
 
         # ------------------------------------------------------------------ #
-        #                    6.  MAIN KYC REGISTRATION                        #
+        #                         6. MAIN KYC REGISTRATION                   #
         # ------------------------------------------------------------------ #
+        # Create the new KycRegistration record
         KycRegistration.objects.create(
             email=email,
             citizenship_number=citizenship_number,
@@ -472,25 +528,28 @@ def verify_kyc(request):
             country=country,
             province=province,
             district=district,
+            publicaddress=publicaddress, # Store the public address from the form
             municipality=municipality,
             ward_no=ward_no,
             photo_front=photo_front,
             photo_voter=photo_voter,
             photo_citizenship_front=photo_citizenship_front,
             photo_citizenship_back=photo_citizenship_back,
-            face_descriptor=face_descriptor,          # <-- STORED HERE
+            face_coordinates=None, # Assuming this is not being sent from frontend currently
+            face_descriptor=face_descriptor_data, # <-- Store the raw JSON array here
+            descriptor_hash=computed_descriptor_hash, # <-- Store the COMPUTED HASH here
         )
 
-        messages.success(request, 'Your KYC has been submitted successfully')
-        return redirect('home')
+        messages.success(request, 'Your KYC has been submitted successfully and is awaiting admin verification.')
+        return redirect('home') # Redirect to home or a dedicated 'KYC submitted' page
 
     # GET request – render page
     return render(
         request,
         'myapp/kkyc.html',
         {
-            'user'                : user,
-            'user_full_name'      : user_full_name,
+            'user': user,
+            'user_full_name': user_full_name,
             'user_profile_picture': user_profile_picture,
         }
     )
@@ -522,6 +581,7 @@ def addcandidate(request):
         first_name = request.POST.get('first_name')
         middle_name = request.POST.get('middle_name')
         last_name = request.POST.get('last_name')
+        publicaddresss = request.POST.get('publicaddress')
         dob = request.POST.get('dob')
         email = request.POST.get('email')
         phone = request.POST.get('phone')
@@ -540,6 +600,7 @@ def addcandidate(request):
             first_name=first_name,
             middle_name=middle_name,
             last_name=last_name,
+            publicaddress = publicaddresss,
             date_of_birth=dob,
             email=email,
             phone_number=phone,
@@ -554,7 +615,7 @@ def addcandidate(request):
         )
         candidate_profile.save()
         messages.success(request, 'Candidate added successfully.')
-        return redirect('base')
+        return redirect('dashboard')
     return render(request, 'myapp/add_candidate.html')
 
 def viewcandidate(request):
@@ -570,28 +631,54 @@ def viewcandidate(request):
             messages.error(request, 'Candidate with that email doesnot exist')
             return render(request, 'myapp/view_candidate.html', {'error': 'Candidate not found'})
     return render(request, 'myapp/view_candidate.html')
-
 def candidates(request):
     candidates = CandidateProfile.objects.all()
     user_profile_picture = None
     user_full_name = None
+
     email = request.session.get('email')
     if email:
         try:
             profile_picture = ProfilePicture.objects.get(email=email)
-            user_profile_picture = profile_picture.photo_front.url if profile_picture.photo_front else None
+            user_profile_picture = profile_picture.photo_front.url
         except ProfilePicture.DoesNotExist:
-            user_profile_picture = None
+            pass
+
         try:
             user_profile = UserProfile.objects.get(email=email)
             user_full_name = f"{user_profile.first_name} {user_profile.middle_name} {user_profile.last_name}"
         except UserProfile.DoesNotExist:
             pass
+
     return render(request, 'myapp/candidates.html', {
         'candidates': candidates,
         'user_profile_picture': user_profile_picture,
         'user_full_name': user_full_name,
     })
+
+    
+
+def get_candidate_addresses(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+
+        emails = [data.get("mp"), data.get("mayor"), data.get("deputy"), data.get("ward")]
+        addresses = []
+
+        for email in emails:
+            candidate = CandidateProfile.objects.get(email=email)
+            addresses.append(candidate.publicaddress)
+
+        return JsonResponse({"success": True, "addresses": addresses})
+
+    except CandidateProfile.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Candidate not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
 
 def user_logout(request):
     request.session.flush()
@@ -867,120 +954,92 @@ def verify_face(request):
 
 def submit_vote(request):
     print(f"submit_vote: Method: {request.method}, Session: {request.session.session_key}, CSRF Token: {request.POST.get('csrfmiddlewaretoken')}, Cookies: {request.COOKIES}, Session email: {request.session.get('email')}")
-    
+
     if not request.session.get('user_verified'):
         messages.error(request, 'You need to log in to vote.')
         print("submit_vote: Redirecting to userlogin due to unauthenticated user")
         return redirect('userlogin')
-    
+
     email = request.session.get('email')
     user_profile = UserProfile.objects.filter(email=email).first()
     if not user_profile:
         messages.error(request, 'User profile not found.')
         print("submit_vote: Redirecting to userlogin due to missing user profile")
         return redirect('userlogin')
-    
+
     kyc_verified = Kycverified.objects.filter(email=email).first()
     if not kyc_verified:
         messages.error(request, 'Your KYC is not verified. Please submit and verify your KYC.')
         print("submit_vote: Redirecting to verify_kyc due to unverified KYC")
         return redirect('verify_kyc')
-    
+
     kyc_request = KycRequest.objects.filter(email=email).first()
     if kyc_request and kyc_request.status == 'rejected':
         messages.error(request, 'Your KYC has been rejected. Please update your KYC.')
         print("submit_vote: Redirecting to update_kyc due to rejected KYC")
         return redirect('update_kyc')
-    
+
     if kyc_request and kyc_request.status == 'pending':
         messages.warning(request, 'Your KYC verification is in progress. Please wait for approval.')
         print("submit_vote: Redirecting to vote due to pending KYC")
         return redirect('vote')
-    
+
     vote_status = VoteStatus.objects.filter(email=email).first()
     if vote_status:
         messages.error(request, 'You have already voted.')
         print("submit_vote: Redirecting to vote due to existing vote")
         return redirect('vote')
-    
+
     if not request.session.get('face_verified'):
         messages.error(request, 'Please complete facial verification before voting.')
         print("submit_vote: Redirecting to vote due to missing facial verification")
         return redirect('vote')
-    
+
     if request.method == 'POST':
         print(f"submit_vote: POST data: {request.POST}")
-        
+
         if not request.POST.get('csrfmiddlewaretoken'):
             messages.error(request, 'Invalid form submission. Please try again.')
             print("submit_vote: Redirecting to vote due to missing CSRF token")
             return redirect('vote')
-        
+
         try:
             mp_vote = request.POST.get('mp_vote')
             mayor_vote = request.POST.get('mayor_vote')
             deputy_mayor_vote = request.POST.get('deputy_mayor_vote')
             ward_chairperson_vote = request.POST.get('ward_chairperson_vote')
-            
+
             if not (mp_vote or mayor_vote or deputy_mayor_vote or ward_chairperson_vote):
                 messages.error(request, 'Please select at least one candidate to vote for.')
                 print("submit_vote: Redirecting to vote due to no candidate selected")
                 return redirect('vote')
-            
-            kyc = KycRegistration.objects.get(email=email)
-            
-            # MP Vote
-            if mp_vote:
-                if MpVote.objects.filter(voter_email=email).exists():
-                    messages.error(request, 'You have already voted for MP.')
-                    return redirect('vote')
-                MpVote.objects.create(voter_email=email, candidate_email=mp_vote, district=kyc.district)
-            
-            # Mayor Vote
-            if mayor_vote:
-                if MayorVote.objects.filter(voter_email=email).exists():
-                    messages.error(request, 'You have already voted for Mayor.')
-                    return redirect('vote')
-                MayorVote.objects.create(voter_email=email, candidate_email=mayor_vote, municipality=kyc.municipality)
-            
-            # Deputy Mayor Vote
-            if deputy_mayor_vote:
-                if DeputymayorVote.objects.filter(voter_email=email).exists():
-                    messages.error(request, 'You have already voted for Deputy Mayor.')
-                    return redirect('vote')
-                DeputymayorVote.objects.create(voter_email=email, candidate_email=deputy_mayor_vote, municipality=kyc.municipality)
-            
-            # Ward Chairperson Vote
-            if ward_chairperson_vote:
-                if WardVote.objects.filter(voter_email=email).exists():
-                    messages.error(request, 'You have already voted for Ward Chairperson.')
-                    return redirect('vote')
-                WardVote.objects.create(voter_email=email, candidate_email=ward_chairperson_vote, wardno=kyc.ward_no)
-            
-            # Mark user as voted
+
+            # ✅ We do NOT store any actual vote in database
+
+            # ✅ We only mark this user as having voted
             VoteStatus.objects.create(email=email)
-            
-            # Reset face verification session flag
+
+            # ✅ Reset facial verification flag
             request.session['face_verified'] = False
-            
+
             messages.success(request, 'Your vote has been submitted successfully!')
-            print("submit_vote: Vote submitted successfully")
+            print("submit_vote: Vote recorded successfully (only status updated)")
             return redirect('vote')
-        
+
         except Exception as e:
             messages.error(request, f'Error submitting vote: {str(e)}')
             print(f"submit_vote: Error: {str(e)}")
             return redirect('vote')
-    
+
     # GET request - prepare context for voting page
     mp_candidates = CandidateProfile.objects.filter(role='MP')
     mayor_candidates = CandidateProfile.objects.filter(role='Mayor')
     deputy_mayor_candidates = CandidateProfile.objects.filter(role='Deputy Mayor')
     ward_candidate = CandidateProfile.objects.filter(role='Ward Chairperson')
-    
+
     profile_picture_obj = ProfilePicture.objects.filter(email=email).first()
     user_profile_picture = profile_picture_obj.photo_front.url if profile_picture_obj and profile_picture_obj.photo_front else None
-    
+
     context = {
         'user_full_name': f"{user_profile.first_name} {user_profile.last_name}" if user_profile else None,
         'user_profile_picture': user_profile_picture,
@@ -993,9 +1052,8 @@ def submit_vote(request):
         'kycrequest': kyc_request.status == 'pending' if kyc_request else False,
         'user_verified': kyc_verified is not None,
     }
-    
-    return render(request, 'myapp/vote_here.html', context)
 
+    return render(request, 'myapp/vote_here.html', context)
 
 def view_kycrequest(request):
     requests = KycRequest.objects.all()
@@ -1005,21 +1063,1156 @@ def view_kyc(request, request_id):
     kyc_request = get_object_or_404(KycRequest, pk=request_id)
     kyc_registration = get_object_or_404(KycRegistration, email=kyc_request.email)
     user_profile = get_object_or_404(UserProfile, email=kyc_registration.email)
+
+    descriptor = kyc_registration.face_descriptor
+    descriptor_hash = kyc_registration.descriptor_hash  # Ensure this exists in your model
+    public_address = kyc_registration.publicaddress     # Already present from your template
+    contract_abi =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+    contract_abi_json = json.dumps(contract_abi)
     return render(request, 'myapp/view_kyc.html', {
         'kyc_registration': kyc_registration,
         'user_profile': user_profile,
         'kyc_request': kyc_request,
+        'descriptor_hash': descriptor_hash,
+        'public_address': public_address,
+        
+        'contract_abi_json': contract_abi_json,
+        
     })
+
+
+import hashlib
+
+
 
 def accept_kyc(request, request_id):
     kyc_request = get_object_or_404(KycRequest, pk=request_id)
+    kyc_registration = get_object_or_404(KycRegistration, email=kyc_request.email)
+    user_profile = get_object_or_404(UserProfile, email=kyc_registration.email)
+
+    contract_abi =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": False,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": True,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": False,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": False,
+		"inputs": [
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": False,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+    contract_abi_json = json.dumps(contract_abi)
+
+    return render(request, 'myapp/view_kyc.html', {
+        'kyc_request': kyc_request,
+        'kyc_registration': kyc_registration,
+        'user_profile': user_profile,
+        'descriptor_hash': kyc_registration.descriptor_hash,  # Use stored hash
+        'public_address': kyc_registration.publicaddress,    # Correct field
+        'municipality': kyc_registration.municipality,       # Map to uc
+        'contract_abi_json': contract_abi_json,
+    })
+
+def final_accept_kyc(request, request_id):
+    kyc_request = get_object_or_404(KycRequest, pk=request_id)
+    
     Kycverified.objects.create(
         email=kyc_request.email,
         verified_by=request.session.get('email'),
     )
     kyc_request.delete()
-    messages.success(request, "KYC accepted succesfully")
+    messages.success(request, "KYC accepted successfully and stored on blockchain.")
     return redirect('view_kycrequest')
+
+
 
 def reject_kyc(request, request_id):
     kyc_request = get_object_or_404(KycRequest, pk=request_id)
@@ -1164,38 +2357,388 @@ def update_kyc(request):
     }
     return render(request, 'myapp/update_kyc.html', context)
 
+
 def dashboard(request):
+    if not request.session.get('admin_verified'):
+     return redirect('login')
     total_users = UserProfile.objects.count()
     total_candidates = CandidateProfile.objects.count()
     kyc_requests = KycRequest.objects.count()
     kyc_verified = Kycverified.objects.count()
+    
+    
     context = {
         'total_users': total_users,
         'total_candidates': total_candidates,
         'kyc_requests': kyc_requests,
         'kyc_verified': kyc_verified,
+      
     }
+
     return render(request, 'myapp/dashboard.html', context)
 
-def candidates_by_party(request):
-    party_counts = CandidateProfile.objects.values('political_party').annotate(total=Count('id'))
-    parties = [item['political_party'] for item in party_counts]
-    counts = [item['total'] for item in party_counts]
+def calculate_age(dob):
+    today = date.today()
+    return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+def user_age_distribution():
+    users = UserProfile.objects.all()  # Fetch all user profiles
+    age_groups = {'18-25': 0, '26-45': 0, '46-70': 0, '71-100': 0}
+
+    # Calculate age distribution
+    for user in users:
+        age = calculate_age(user.dob)
+        if 18 <= age <= 25:
+            age_groups['18-25'] += 1
+        elif 26 <= age <= 45:
+            age_groups['26-45'] += 1
+        elif 46 <= age <= 70:
+            age_groups['46-70'] += 1
+        elif 71 <= age <= 100:
+            age_groups['71-100'] += 1
+
+    # Generate the graph
     fig, ax = plt.subplots()
-    ax.bar(parties, counts)
-    ax.set_xlabel('Political Party')
-    ax.set_ylabel('Number of Candidates')
-    ax.set_title('Number of Candidates by Political Party')
-    ax.tick_params(axis='x', rotation=45)
+    ax.bar(age_groups.keys(), age_groups.values())
+    ax.set_xlabel('Age Groups of Users')
+    ax.set_ylabel('Number of Users')
+    ax.set_title('User Age Distribution')
+
+    plt.tight_layout()
+
+    # Save the plot to a BytesIO object
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     plt.close(fig)
     buffer.seek(0)
     image_png = buffer.getvalue()
     buffer.close()
-    graph = base64.b64encode(image_png).decode('utf-8')
-    print("Graph data:", graph)
-    return render(request, 'myapp/candidate_party_graph.html', {'graph': graph})
+
+    # Encode the PNG image to base64 string
+    user_age_graph = base64.b64encode(image_png).decode('utf-8')
+
+    # Pass the graph data to the template
+    return user_age_graph
+
+
+
+def candidate_age_distribution():
+    candidates = CandidateProfile.objects.all()  # Fetch all user profiles
+    age_groups = {'18-25': 0, '26-45': 0, '46-70': 0, '71-100': 0}
+
+    # Calculate age distribution
+    for user in candidates:
+        age = calculate_age(user.date_of_birth)
+        if 18 <= age <= 25:
+            age_groups['18-25'] += 1
+        elif 26 <= age <= 45:
+            age_groups['26-45'] += 1
+        elif 46 <= age <= 70:
+            age_groups['46-70'] += 1
+        elif 71 <= age <= 100:
+            age_groups['71-100'] += 1
+
+    # Generate the graph
+    fig, ax = plt.subplots()
+    ax.bar(age_groups.keys(), age_groups.values())
+    ax.set_xlabel('Age Groups of candidates')
+    ax.set_ylabel('Number of Candidates')
+    ax.set_title('Candidate Age Distribution')
+
+    plt.tight_layout()
+
+    # Save the plot to a BytesIO object
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    plt.close(fig)
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+
+    # Encode the PNG image to base64 string
+    candidate_age_graph = base64.b64encode(image_png).decode('utf-8')
+
+    # Pass the graph data to the template
+    return candidate_age_graph
+
+
+
+
+
+
+
+
+
+def candidate_by_party():
+    parties_list = ['Samajwadi', 'Nepali Congress', 'Maoist', 'CPN-UML']
+    party_counts = CandidateProfile.objects.filter(political_party__in=parties_list) \
+                                           .values('political_party') \
+                                           .annotate(total=Count('id'))
+    
+    counts_dict = {party: 0 for party in parties_list}
+    for item in party_counts:
+        counts_dict[item['political_party']] = item['total']
+
+    parties = list(counts_dict.keys())
+    counts = list(counts_dict.values())
+
+    if not parties or not counts:
+        return None
+
+    fig, ax = plt.subplots()
+    ax.bar(parties, counts)
+    ax.set_xlabel('Political Party')
+    ax.set_ylabel('Number of Candidates')
+    ax.set_title('Number of Candidates by Political Party')
+    ax.tick_params(axis='x', rotation=45)
+
+    # Adjust the layout to make sure the labels are not cut off
+    plt.tight_layout()
+
+    # Save the plot to a BytesIO object
+    buffer = BytesIO()
+    plt.savefig(buffer, format='jpg', bbox_inches='tight')
+    plt.close(fig)
+    buffer.seek(0)
+    image_jpg = buffer.getvalue()
+    buffer.close()
+
+    graph = base64.b64encode(image_jpg).decode('utf-8')
+    return graph
+
+
+def userprovince_piechart():
+    # List of provinces
+    provinces = ["Koshi Pradesh", "Madesh Pradesh", "Bagmati Province", "Gandaki Province",
+                 "Lumbini Province", "Karnali Province", "Sudurpaschim Province"]
+
+    # Query to get the count of users per province
+    province_counts = KycRegistration.objects.values('province').annotate(total=Count('id'))
+    
+    # Initialize a dictionary to store counts for all specified provinces
+    counts_dict = {province: 0 for province in provinces}
+    
+    # Populate the dictionary with actual counts from the query
+    for item in province_counts:
+        counts_dict[item['province']] = item['total']
+
+    # Extract provinces and their counts for plotting
+    province_names = list(counts_dict.keys())
+    province_values = list(counts_dict.values())
+
+    # Generate the pie chart
+    fig, ax = plt.subplots()
+    
+    # Define a function to format the pie chart labels as percentages
+    def autopct_format(pct):
+        return '{:.1f}%'.format(pct)
+
+    wedges, texts, autotexts = ax.pie(province_values, labels=province_names, autopct=autopct_format, startangle=140)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Add a legend with percentages
+    legend_labels = [f'{province}: {pct:.1f}%' for province, pct in zip(province_names, [p * 100 / sum(province_values) for p in province_values])]
+    ax.legend(wedges, legend_labels, title="Provinces", loc="lower right", bbox_to_anchor=(1.3, 0))
+
+    # Save the plot to a BytesIO object
+    buffer = BytesIO()
+    plt.savefig(buffer, format='jpg', bbox_inches='tight')
+    plt.close(fig)
+    buffer.seek(0)
+    image_jpg = buffer.getvalue()
+    buffer.close()
+    # Encode the JPG image to base64 string
+    user_province_piechart = base64.b64encode(image_jpg).decode('utf-8')
+
+    return user_province_piechart
+
+
+def candidate_piechart():
+    # List of provinces
+    provinces = ["Koshi Pradesh", "Madesh Pradesh", "Bagmati Province", "Gandaki Province",
+                 "Lumbini Province", "Karnali Province", "Sudurpaschim Province"]
+
+    # Query to get the count of users per province
+    province_counts = KycRegistration.objects.values('province').annotate(total=Count('id'))
+    
+    # Initialize a dictionary to store counts for all specified provinces
+    counts_dict = {province: 0 for province in provinces}
+    
+    # Populate the dictionary with actual counts from the query
+    for item in province_counts:
+        counts_dict[item['province']] = item['total']
+
+    # Extract provinces and their counts for plotting
+    province_names = list(counts_dict.keys())
+    province_values = list(counts_dict.values())
+
+    # Generate the pie chart
+    fig, ax = plt.subplots()
+    
+    # Define a function to format the pie chart labels as percentages
+    def autopct_format(pct):
+        return '{:.1f}%'.format(pct)
+
+    wedges, texts, autotexts = ax.pie(province_values, labels=province_names, autopct=autopct_format, startangle=140)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Add a legend with percentages
+    legend_labels = [f'{province}: {pct:.1f}%' for province, pct in zip(province_names, [p * 100 / sum(province_values) for p in province_values])]
+    ax.legend(wedges, legend_labels, title="Provinces", loc="lower right", bbox_to_anchor=(1.3, 0))
+
+    # Save the plot to a BytesIO object
+    buffer = BytesIO()
+    plt.savefig(buffer, format='jpg', bbox_inches='tight')
+    plt.close(fig)
+    buffer.seek(0)
+    image_jpg = buffer.getvalue()
+    buffer.close()
+    # Encode the JPG image to base64 string
+    user_province_piechart = base64.b64encode(image_jpg).decode('utf-8')
+
+    return user_province_piechart
+
+
+
+def usergender_piechart():
+    # Define the possible genders
+    genders = ['male', 'female', 'others']
+
+    # Query to get the count of users per gender
+    gender_counts = KycRegistration.objects.values('gender').annotate(total=Count('id'))
+    
+    # Initialize a dictionary to store counts for all specified genders
+    counts_dict = {gender: 0 for gender in genders}
+    
+    # Populate the dictionary with actual counts from the query
+    for item in gender_counts:
+        if item['gender'] in counts_dict:
+            counts_dict[item['gender']] = item['total']
+    
+    # Extract genders and their counts for plotting
+    gender_names = list(counts_dict.keys())
+    gender_values = list(counts_dict.values())
+
+    # Generate the pie chart
+    fig, ax = plt.subplots()
+    
+    # Define a function to format the pie chart labels as percentages
+    def autopct_format(pct):
+        return '{:.1f}%'.format(pct)
+
+    wedges, texts, autotexts = ax.pie(gender_values, labels=gender_names, autopct=autopct_format, startangle=140)
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Add a legend with percentages
+    total_count = sum(gender_values)
+    legend_labels = [f'{gender}: {value * 100 / total_count:.1f}%' for gender, value in counts_dict.items()]
+    ax.legend(wedges, legend_labels, title="Genders", loc="lower right", bbox_to_anchor=(1.3, 0))
+
+    # Save the plot to a BytesIO object
+    buffer = BytesIO()
+    plt.savefig(buffer, format='jpg', bbox_inches='tight')
+    plt.close(fig)
+    buffer.seek(0)
+    image_jpg = buffer.getvalue()
+    buffer.close()
+
+    # Encode the JPG image to base64 string
+    user_gender_piechart = base64.b64encode(image_jpg).decode('utf-8')
+
+    return user_gender_piechart
+
+
+
+
+def resultadmin(request):
+    if not request.session.get('admin_verified'):
+        return redirect('login')
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        publicaddress = request.POST.get('publicaddress')
+        try:
+            candidate = CandidateProfile.objects.get(publicaddress=publicaddress)
+            response = {
+                'status': 'success',
+                'candidate': {
+                    'first_name': candidate.first_name,
+                    'middle_name': candidate.middle_name,
+                    'last_name': candidate.last_name,
+                    'role': candidate.role,
+                    'party': candidate.political_party,
+                    'district': candidate.district,
+                    'municipality': candidate.municipality,
+                    'ward': candidate.ward,
+                    'profile_picture': candidate.profile_picture.url,
+                }
+            }
+        except CandidateProfile.DoesNotExist:
+            response = {'status': 'error', 'message': 'Candidate with that public address does not exist'}
+        except Exception as e:
+            response = {'status': 'error', 'message': str(e)}
+            # Optionally log the error
+            print(f"Error: {str(e)}")
+
+        return JsonResponse(response)
+
+    return render(request, 'myapp/resultadmin.html')
+
+
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+def resultuser(request):
+    if not request.session.get('user_verified'):
+        return redirect('userlogin')
+
+    email = request.session.get('email')
+    user_profile_picture = None
+    user_full_name = None
+    user_uc = None
+
+    if email:
+        try:
+            profile_picture = ProfilePicture.objects.get(email=email)
+            user_profile_picture = profile_picture.photo_front.url
+        except ProfilePicture.DoesNotExist:
+            pass
+
+        try:
+            user_profile = UserProfile.objects.get(email=email)
+            user_full_name = f"{user_profile.first_name} {user_profile.middle_name} {user_profile.last_name}"
+        except UserProfile.DoesNotExist:
+            pass
+
+        try:
+            kyc = KycRegistration.objects.get(email=email)
+            user_uc = kyc.district.strip().lower().replace(" ", "_")  # Normalize UC
+        except KycRegistration.DoesNotExist:
+            pass
+
+    return render(request, 'myapp/resultuser.html', {
+        'user_profile_picture': user_profile_picture,
+        'user_full_name': user_full_name,
+        'user_uc': user_uc
+    })
 
 def vote_timing(request):
     return render(request, 'myapp/vote_timing.html')
+
+
+def get_candidate_info(request):
+    address = request.GET.get("address", "").lower()
+    try:
+        candidate = CandidateProfile.objects.get(public_address__iexact=address)
+        data = {
+            "first_name": candidate.first_name,
+            "middle_name": candidate.middle_name,
+            "lasr_name": candidate.last_name,
+            "role": candidate.role,
+            "district": candidate.district,
+            "municipality": candidate.municipality,
+            "ward": candidate.ward,
+            "image": candidate.image.url if candidate.image else "",
+            "votes": 0  # We'll handle blockchain votes later if needed
+        }
+        return JsonResponse(data)
+    except CandidateProfile.DoesNotExist:
+        return JsonResponse({"error": "Candidate not found"}, status=404)

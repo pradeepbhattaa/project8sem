@@ -1,9 +1,10 @@
+
 /* =========================================================
    static/myapp/js/face_detection.js
    ========================================================= */
 
 /* ---------- toast / alert helper ------------------------- */
-function showMessage (type, txt) {
+function showMessage(type, txt) {
   let wrap = document.getElementById('message-container');
   if (!wrap) {
     wrap = document.createElement('div');
@@ -18,8 +19,8 @@ function showMessage (type, txt) {
   setTimeout(() => alert.remove(), 4000);
 }
 
-/* ---------- 1 load core models --------------------------- */
-async function loadFaceApiModels () {
+/* ---------- 1 load core models --------------------------- */
+async function loadFaceApiModels() {
   if (!window.faceapi) { showMessage('error', 'face‑api.js missing'); return false; }
   const URL = '/static/myapp/models';
   try {
@@ -32,10 +33,10 @@ async function loadFaceApiModels () {
   } catch (e) { console.error(e); showMessage('error', 'Model load failed'); return false; }
 }
 
-/* ---------- 2 descriptor from uploaded photo ------------- */
-async function detectFaceDescriptor (fileInput, hiddenId, previewId) {
+/* ---------- 2 descriptor from uploaded photo ------------- */
+async function detectFaceDescriptor(fileInput, hiddenId, previewId) {
   const file = fileInput.files[0]; if (!file) return;
-  const img  = new Image(); img.src = URL.createObjectURL(file);
+  const img = new Image(); img.src = URL.createObjectURL(file);
 
   img.onload = async () => {
     const det = await faceapi
@@ -56,33 +57,37 @@ async function detectFaceDescriptor (fileInput, hiddenId, previewId) {
     URL.revokeObjectURL(img.src);
   };
 }
-
-/* ---------- 3 liveness sequence -------------------------- */
-const FRAME_MS     = 120;
-const TIMEOUT_MS   = 10000;
-const PITCH_THRESH = 10;
-const YAW_THRESH   = 8;
-const MAR_THRESH   = 0.35;
+const FRAME_MS = 120;
+const TIMEOUT_MS = 10000;
+const MAR_THRESH = 0.35;
+const SMILE_THRESH = 1.2; // Relative increase in mouth width for smile
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
-const avgX  = pts => pts.reduce((s,p)=>s+p.x,0)/pts.length;
-function mouthAspectRatio (lm) {
+const avgX = pts => pts.reduce((s,p) => s+p.x, 0) / pts.length;
+
+function mouthAspectRatio(lm) {
   const p = lm.positions;
   const v = Math.hypot(p[62].x - p[66].x, p[62].y - p[66].y);
   const h = Math.hypot(p[60].x - p[64].x, p[60].y - p[64].y);
   return v / (h + 1e-6);
 }
 
-async function runChallenge (video, canvas, condFn, prompt, success) {
+function smileRatio(lm, baseWidth) {
+  const p = lm.positions;
+  const width = Math.hypot(p[48].x - p[54].x, p[48].y - p[54].y); // Mouth corners
+  return baseWidth ? width / baseWidth : 1.0;
+}
+
+async function runChallenge(video, canvas, condFn, prompt, success) {
   showMessage('info', prompt);
 
   const opt = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 });
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  const t0  = Date.now();
-  let base  = null;
+  const t0 = Date.now();
+  let base = null;
 
   while (Date.now() - t0 < TIMEOUT_MS) {
-    canvas.width  = video.videoWidth;
+    canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
 
@@ -91,16 +96,26 @@ async function runChallenge (video, canvas, condFn, prompt, success) {
       .withFaceLandmarks()
       .withFaceDescriptor();
 
-    if (!det) { await delay(FRAME_MS); continue; }
+    if (!det) { 
+      console.log('No face detected this frame.');
+      await delay(FRAME_MS); 
+      continue; 
+    }
 
     const lm = det.landmarks;
-    const pitch = lm.getJawOutline()[8].y - lm.getNose()[3].y;
-    const yaw   = avgX(lm.getRightEye()) - avgX(lm.getLeftEye());
-    const mar   = mouthAspectRatio(lm);
+    const mar = mouthAspectRatio(lm);
+    const smile = smileRatio(lm, base ? base.mouthWidth : null);
 
-    if (!base) base = { pitch, yaw };
+    if (!base) {
+      const p = lm.positions;
+      base = { 
+        mouthWidth: Math.hypot(p[48].x - p[54].x, p[48].y - p[54].y) 
+      };
+    }
 
-    if (condFn({ pitch, yaw, mar, base })) {
+    console.log(`Challenge: ${prompt}, mar: ${mar.toFixed(2)}, smile: ${smile.toFixed(2)}, base: ${JSON.stringify(base)}`);
+
+    if (condFn({ mar, smile, base })) {
       showMessage('success', success);
       return det.descriptor;
     }
@@ -109,43 +124,30 @@ async function runChallenge (video, canvas, condFn, prompt, success) {
   showMessage('warning', `Timeout – ${prompt}`);
   return null;
 }
- async function captureLiveDescriptor(video, canvas, hiddenId) {
-     if (!window.faceapi) { showMessage('error','face‑api not ready'); return false; }
-     if (!video.videoWidth) { showMessage('error','Webcam not ready'); return false; }
 
-     /* --- challenge pool (LEFT logic fixed) --- */
-     const CH = [
-       { prompt:'Move head DOWN',    success:'Head DOWN ✅',
-         cond:({pitch,base})=> base.pitch - pitch > PITCH_THRESH },
-       { prompt:'Move head UP',  success:'Head UP ✅',
-         cond:({pitch,base})=> pitch - base.pitch > PITCH_THRESH },
-       { prompt:'Turn head RIGHT',  success:'Head Right ✅',
-         cond:({yaw,base})  => base.yaw - yaw > YAW_THRESH },   // Fixed: yaw decreases
-       { prompt:'Turn head LEFT', success:'Head LEFT ✅',
-         cond:({yaw,base})  => base.yaw - yaw > YAW_THRESH },   // Unchanged
-       { prompt:'Open your mouth clearly', success:'Mouth open ✅',
-         cond:({mar})      => mar > MAR_THRESH }
-     ];
+async function captureLiveDescriptor(video, canvas, hiddenId) {
+  if (!window.faceapi) { showMessage('error', 'face‑api not ready'); return false; }
+  if (!video.videoWidth) { showMessage('error', 'Webcam not ready'); return false; }
 
-     /* pick one vertical, one horizontal, plus mouth */
-     const vertical   = CH.filter(c => /UP|DOWN/.test(c.prompt));
-     const horizontal = CH.filter(c => /LEFT|RIGHT/.test(c.prompt));
-     const mouth      = CH.find(c => c.prompt.startsWith('Open'));
+  /* --- challenge pool (only smile and open mouth) --- */
+  const CH = [
+    { prompt: 'Open your mouth clearly', success: 'Mouth open ✅',
+      cond: ({mar}) => mar > MAR_THRESH },
+    { prompt: 'Smile clearly', success: 'Smile ✅',
+      cond: ({smile}) => smile > SMILE_THRESH }
+  ];
 
-     const sel = [
-       vertical[Math.floor(Math.random()*vertical.length)],
-       horizontal[Math.floor(Math.random()*horizontal.length)],
-       mouth
-     ].sort(() => 0.5 - Math.random());          // shuffle order
+  /* both challenges are compulsory */
+  const sel = CH.sort(() => 0.5 - Math.random()); // shuffle order
 
-     let desc = null;
-     for (const c of sel) {
-       desc = await runChallenge(video, canvas, c.cond, c.prompt, c.success);
-       if (!desc) { document.getElementById(hiddenId).value=''; return false; }
-       await delay(600);
-     }
+  let desc = null;
+  for (const c of sel) {
+    desc = await runChallenge(video, canvas, c.cond, c.prompt, c.success);
+    if (!desc) { document.getElementById(hiddenId).value = ''; return false; }
+    await delay(600);
+  }
 
-     document.getElementById(hiddenId).value = JSON.stringify(Array.from(desc));
-     showMessage('success','Liveness passed 🎉');
-     return true;
-   }
+  document.getElementById(hiddenId).value = JSON.stringify(Array.from(desc));
+  showMessage('success', 'Liveness passed 🎉');
+  return true;
+}

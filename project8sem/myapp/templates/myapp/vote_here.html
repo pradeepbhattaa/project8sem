@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="{% static 'myapp/css/vote.css' %}" />
   <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}" />
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js" type="application/javascript"></script>
+
 </head>
 <body>
   {% if messages %}
@@ -41,56 +43,57 @@
           />
         </div>
       </div>
-      <div class="nav-center" id="navLinks">
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'candidates' %}">Candidates</a>
-        <a href="{% url 'notices' %}">Notices</a>
-        <a href="{% url 'vote' %}">Vote Here</a>
-        <a href="{% url 'verify_kyc' %}">Verify KYC</a>
-        <a href="{% url 'contact' %}">Contact</a>
-      </div>
-      <div class="nav-right">
-        {% if user_full_name %}
-        <span class="user-full-name">{{ user_full_name }}</span>
-        {% if user_profile_picture %}
-        <img
-          src="{{ user_profile_picture }}"
-          alt="Profile Picture"
-          class="profiles-picture"
-          onclick="toggleDropdown()"
-        />
-        {% else %}
-        <img
-          src="{% static 'myapp/images/user_icon.png' %}"
-          alt="Profiles Picture"
-          class="profiles-picture"
-          onclick="toggleDropdown()"
-        />
-        {% endif %}
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="{% url 'edit_profile' %}" class="profile-items">Edit Profile</a>
-          <a href="{% url 'user_logout' %}" class="profile-items">Logout</a>
+       <div class="nav-center" id="navLinks">
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'candidates' %}">Candidates</a>
+                    <a href="{% url 'notices' %}">Notices</a>
+                    <a href="{% url 'vote' %}">Vote Here</a>
+                    <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+                    <a href="{% url 'resultuser' %}">Results</a>
+                    <a href="{% url 'contact' %}">Contact</a>
+                </div>
+                <div class="nav-right">
+                    {% if user_full_name %}
+                    <span class="user-full-name">{{ user_full_name }}</span>
+                    {% if user_profile_picture %}
+                    <img src="{{ user_profile_picture}}" alt="Profile Picture" class="profiles-picture"
+                        onclick="toggleDropdown()">
+                    {% else %}
+                    <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture"
+                        onclick="toggleDropdown()">
+                    {% endif %}
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+                        <a href="{% url 'user_logout' %}">Logout</a>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
+
+        <div class="side-menu" id="sideMenu">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <div id="sideNavLinks">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'candidates' %}">Candidates</a>
+                <a href="{% url 'notices' %}">Notices</a>
+                <a href="{% url 'vote' %}">Vote Here</a>
+                <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+                <a href="{% url 'resultuser' %}">Results</a>
+                <a href="{% url 'contact' %}">Contact</a>
+            </div>
         </div>
-        {% else %}
-        <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
-        {% endif %}
-      </div>
-    </nav>
-  </header>
-  <div class="side-menu" id="sideMenu">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-    <div id="sideNavLinks">
-      <a href="{% url 'home' %}">Home</a>
-      <a href="{% url 'candidates' %}">Candidates</a>
-      <a href="{% url 'notices' %}">Notices</a>
-      <a href="{% url 'vote' %}">Vote Here</a>
-      <a href="{% url 'verify_kyc' %}">Verify KYC</a>
-      <a href="{% url 'contact' %}">Contact</a>
-    </div>
   </div>
   <main>
+	
     <section class="vote-section">
       <h1>Vote Here</h1>
+	  <div id="voting-status-message" style="color: red; font-weight: bold; text-align: center;"></div>
+<div id="voting-ended-message" style="display: none; color: red; font-weight: bold; text-align: center;">
+  Voting has ended. Please check the <a href="{% url 'resultuser' %}">results page</a>.
+</div>
       <form method="post" action="{% url 'submit_vote' %}" id="vote-form">
         {% csrf_token %}
         <div class="vote-container">
@@ -300,109 +303,709 @@
     }, 3000);
   }
 </script>
+
 <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    console.log("vote_here.html script initialized for: {{ request.session.email|default:'anonymous' }}");
+document.addEventListener("DOMContentLoaded", async () => {
+  const contractAddress = "0x96283B521509b8409a33e51109B0Ef314b2d1B38";
+const contractABI =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+ 
+const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
 
-    const voteForm = document.getElementById("vote-form");
-    if (!voteForm) {
-      console.error('Form with id="vote-form" not found');
-      showToast("Form not found. Please contact support.", "error");
-      return;
+const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+  // ⏱ Check voting time
+  try {
+    const currentTime = Math.floor(Date.now() / 1000);
+    const startTime = Number(await contract.startTime());
+    const endTime = Number(await contract.endTime());
+
+    console.log("Voting Schedule:", { currentTime, startTime, endTime });
+
+    if (currentTime < startTime) {
+      document.getElementById("voting-status-message").textContent =
+        "Your KYC is verified, but voting has not started yet.";
+      document.getElementById("vote-form").style.display = "none";
+    } else if (currentTime > endTime) {
+      document.getElementById("voting-status-message").textContent =
+        "Voting has ended. Please check the results.";
+      document.getElementById("vote-form").style.display = "none";
+    } else {
+      document.getElementById("voting-status-message").textContent = "";
+      document.getElementById("vote-form").style.display = "block";
     }
+  } catch (err) {
+    console.error("Error fetching voting times:", err);
+    showToast("Failed to check voting schedule.", "error");
+  }
 
-    const csrfToken = voteForm.querySelector('input[name="csrfmiddlewaretoken"]').value;
-    if (!csrfToken) {
-      console.error("CSRF token not found");
-      showToast("Form configuration error. Please contact support.", "error");
-      return;
-    }
+  const voteForm = document.getElementById("vote-form");
+  const csrfToken = voteForm.querySelector('input[name="csrfmiddlewaretoken"]').value;
+  const verifyFaceBtn = document.getElementById("verify-face-btn");
+  const submitVoteBtn = document.getElementById("submit-vote-btn");
 
-    const verifyFaceBtn = document.getElementById("verify-face-btn");
-    const submitVoteBtn = document.getElementById("submit-vote-btn");
+  // 👁 Load face-api models
+  try {
+    const modelsLoaded = await loadFaceApiModels();
+    if (!modelsLoaded) throw new Error("Face-api models not loaded.");
+    console.log("face-api.js models loaded.");
+  } catch (error) {
+    console.error("Model load error:", error);
+    showToast("Facial recognition initialization failed.", "error");
+    submitVoteBtn.disabled = true;
+    return;
+  }
 
+  // 🎥 Verify Face Button
+  verifyFaceBtn.addEventListener("click", async () => {
+    let stream;
     try {
-      const modelsLoaded = await loadFaceApiModels();
-      if (!modelsLoaded) {
-        console.error("Failed to load face-api.js models");
-        submitVoteBtn.disabled = true;
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const webcam = document.getElementById("webcam");
+      const canvas = document.getElementById("canvas");
+
+      if (!webcam || !canvas) {
+        showToast("Webcam or canvas missing.", "error");
         return;
       }
-      console.log("Face-api.js models loaded");
-    } catch (error) {
-      console.error("Error loading face-api.js models:", error);
-      showToast("Failed to initialize facial recognition. Please try again.", "error");
-      submitVoteBtn.disabled = true;
-      return;
-    }
 
-    verifyFaceBtn.addEventListener("click", async () => {
-      console.log("Verify Yourself button clicked");
-      let stream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const webcam = document.getElementById("webcam");
-        const canvas = document.getElementById("canvas");
-        if (!webcam || !canvas) {
-          console.error("Webcam or canvas element not found");
-          showToast("Webcam or canvas not available. Please try again.", "error");
-          stream.getTracks().forEach((track) => track.stop());
-          return;
-        }
+      webcam.srcObject = stream;
+      showToast("Keep your face steady for 3 seconds...");
+      await new Promise((res) => setTimeout(res, 3000));
 
-        webcam.srcObject = stream;
-        console.log("Webcam displayed");
-        showToast("Please position your face in the webcam for verification.and keep yourself teady for 3seconds");
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+      await captureLiveDescriptor(webcam, canvas, "live-descriptor");
+      const liveDescriptor = document.getElementById("live-descriptor").value;
+      stream.getTracks().forEach((track) => track.stop());
 
-        await captureLiveDescriptor(webcam, canvas, "live-descriptor");
-
-        const liveDescriptor = document.getElementById("live-descriptor").value;
-        stream.getTracks().forEach((track) => track.stop());
-
-        if (!liveDescriptor) {
-          console.error("No face descriptor captured");
-          
-          return;
-        }
-
-        console.log("Sending face descriptor to server:", liveDescriptor);
-fetch("{% url 'verify_face' %}", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "X-CSRFToken": csrfToken,
-  },
-  body: JSON.stringify({ live_descriptor: JSON.parse(liveDescriptor) }),
-})
-  .then(async (response) => {
-    const data = await response.json().catch(() => ({})); // try to parse error body
-    if (!response.ok) {
-      throw new Error(data.message || response.statusText);
-    }
-    return data;
-  })
-  .then((data) => {
-    console.log("Parsed server response:", data);
-    showToast("Facial verification successful!", "success");
-    submitVoteBtn.disabled = false;
-  })
-  .catch((error) => {
-    console.error("Error during verification:", error);
-    showToast(error.message || "Facial verification failed. Please try again.", "error");
-    submitVoteBtn.disabled = true;
-  });
-
-
-      } catch (error) {
-        console.error("Error accessing webcam:", error);
-        showToast("Failed to access webcam. Please check permissions.", "error");
-        stream?.getTracks().forEach((track) => track.stop());
-        submitVoteBtn.disabled = true;
+      if (!liveDescriptor) {
+        showToast("No face detected. Try again.", "error");
+        return;
       }
-    });
+
+      const response = await fetch("{% url 'verify_face' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({ live_descriptor: JSON.parse(liveDescriptor) }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Face verification failed.");
+
+      showToast("Facial verification successful!", "success");
+      submitVoteBtn.disabled = false;
+
+    } catch (error) {
+      console.error("Verification error:", error);
+      showToast(error.message || "Verification failed.", "error");
+      stream?.getTracks().forEach((track) => track.stop());
+      submitVoteBtn.disabled = true;
+    }
   });
+
+  // 🗳 Submit Vote Form
+  voteForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    submitVoteBtn.disabled = true;
+
+    try {
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+      const mp = voteForm.querySelector('input[name="mp_vote"]:checked')?.value;
+      const mayor = voteForm.querySelector('input[name="mayor_vote"]:checked')?.value;
+      const deputy = voteForm.querySelector('input[name="deputy_mayor_vote"]:checked')?.value;
+      const ward = voteForm.querySelector('input[name="ward_chairperson_vote"]:checked')?.value;
+
+      if (!mp || !mayor || !deputy || !ward) {
+        showToast("Please select candidates for all roles.", "error");
+        submitVoteBtn.disabled = false;
+        return;
+      }
+
+      const response = await fetch("/get_candidate_addresses/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({ mp, mayor, deputy, ward }),
+      });
+
+      const data = await response.json();
+      if (!data.success || !Array.isArray(data.addresses)) {
+        throw new Error("Could not fetch candidate addresses.");
+      }
+
+      const tx = await contract.vote(data.addresses);
+      showToast("Vote transaction sent. Waiting for confirmation...", "info");
+      await tx.wait();
+
+      showToast("Vote cast successfully!", "success");
+      voteForm.submit(); // ✅ Save off-chain record in Django
+
+    } catch (err) {
+      console.error("Vote submission error:", err);
+      showToast(err.message || "Blockchain voting failed.", "error");
+      submitVoteBtn.disabled = false;
+    }
+  });
+});
 </script>
+
+
 
 </body>
 </html>

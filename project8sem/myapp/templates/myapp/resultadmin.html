@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Results Admin{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'myapp/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/resultadmin.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/css/add_user.css' %}">
+    
+
+</head>
+
+<body>
+
+    <!-- Display alert messages -->
+    {% if messages %}
+    <div id="message-container">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="header">
+        <div class="logo">
+            <p>Hello</p>
+        </div>
+        <div class="title-header">
+            <h1 class="admin-header">Admin Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <ul class="nav-links">
+                <!-- Navigation Links -->
+                <li> <a href="{% url 'dashboard'%}"> Home  </a></li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                    <ul id="user-submenu" class="submenu">
+                        <li><a href="{% url 'adduser' %}">Add User</a></li>
+                        <li><a href="{% url 'edituser' %}">Edit User</a></li>
+                        
+                        <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                        <li><a href="{% url 'view_users' %}">View Users</a></li>
+                        
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                    <ul id="notice-submenu" class="submenu">
+                        <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
+                        <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
+                        <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
+                        <li><a href="{% url 'view_notices' %}">View Notices</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                    <ul id="candidate-submenu" class="submenu">
+                        <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
+                        <li><a href="{% url 'editcandidate' %}">Edit Candidate</a></li>
+                        <li><a href="{% url 'deletecandidate' %}">Delete Candidate</a></li>
+                        <li><a href="{% url 'viewcandidate' %}">View Candidates</a></li>
+                        <li><a href="{% url 'viewall_candidate' %}">View All  Candidates</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
+                    <ul id="kyc-submenu" class="submenu">
+                        <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
+                        <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
+                        <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
+
+                    </ul>
+                </li>
+                
+
+                <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+                <li><a href="{% url 'resultadmin' %}"> Results</a></li>
+                <li><a href="{% url 'adminlogout' %}">Logout</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+
+            <h1>Search by using public address of candidate</h1>
+
+            <div class="add_user-container">
+                <form onsubmit="candidateInfo(event)">
+  <input type="text" id="address" placeholder="Enter candidate address" required />
+  <button type="submit">Search</button>
+</form>
+
+<div id="result"></div>
+
+
+            </div>
+
+            <div class="candidate-details" id="candidateDetails" style="display: none;">
+                <div class="pic">
+                    
+                    
+                </div>
+                
+                <div class="details">
+                    <p><strong>Name:</strong> <span id="name">-</span></p>
+                    <p><strong>Role:</strong> <span id="role">-</span></p>
+                    <p><strong>District:</strong> <span id="municipality">-</span></p>
+                    <p><strong>Votes:</strong> <span id="votes">-</span></p>
+
+                </div>
+            </div>
+            
+        </div>
+        <script src="{% static 'myapp/js/dashboard.js' %}"></script>
+        <script src="{% static 'myapp/js/alert.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+<script>
+  let contract;
+
+  const contractAddress = "0x96283B521509b8409a33e51109B0Ef314b2d1B38";
+const contractABI =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+ 
+async function initContract() {
+    if (!window.ethereum) {
+      alert("Please install MetaMask");
+      return;
+    }
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+
+    contract = new ethers.Contract(contractAddress, contractABI, signer);
+  }
+
+async function candidateInfo(event) {
+  event.preventDefault();
+
+  const address = document.getElementById("address").value;
+
+  if (!ethers.isAddress(address)) {
+    alert("Invalid Ethereum address");
+    return;
+  }
+
+  try {
+    // Set up provider and contract
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    const data = await contract.getCandidate(address);
+
+    // Debug log
+    console.log("Candidate data:", data);
+
+    // Show the candidate details section
+    document.getElementById("candidateDetails").style.display = "block";
+
+    // Fill in values
+    document.getElementById("name").innerText = data[0];
+    document.getElementById("role").innerText = roleName(data[1]); // Optional: map role numbers to strings
+    document.getElementById("municipality").innerText = data[2];
+    document.getElementById("votes").innerText = data[3].toString();
+
+  } catch (error) {
+    console.error("Error fetching candidate data:", error);
+    alert("Candidate not found or error occurred.");
+  }
+}
+
+// Optional helper function to convert role ID to readable string
+function roleName(roleId) {
+  switch (Number(roleId)) {
+    case 0: return "MP";
+    case 1: return "Mayor";
+    case 2: return "Deputy Mayor";
+    case 3: return "Ward Chairperson";
+    default: return "Unknown";
+  }
+}
+
+  window.onload = initContract;
+  
+</script>
+
+    </body>
+
+</html>

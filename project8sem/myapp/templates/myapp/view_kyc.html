@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/view_kyc.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/zoom.css' %}">
-    <script src="{% static 'myapp/js/alert.js' %}"> </script>
+    <script src="{% static 'myapp/js/alert.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js" type="application/javascript"></script>
 {% endblock %}
 
 {% block content %}
@@ -23,99 +24,196 @@
 </div>
 {% endif %}
 
-
-    <div class="headertitle">
+<div class="headertitle">
     <h2>KYC Details for {{ kyc_registration.email }}</h2>
+</div>
 
+<div class="kyc-card">
+    <div class="kyc-photo zoom-container">
+        <img src="{{ kyc_registration.photo_front.url }}" alt="Photo Front" class="kyc-photo-front">
+        <div class="zoom-overlay"></div>
     </div>
-    
-    <div class="kyc-card">
-        <div class="kyc-photo zoom-container">
-            <img src="{{ kyc_registration.photo_front.url }}" alt="Photo Front" class="kyc-photo-front">
+    <div class="kyc-details">
+        <div class="kyc-field">
+            <span class="kyc-label">Email:</span>
+            <span class="kyc-value">{{ kyc_registration.email }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Phone Number:</span>
+            <span class="kyc-value">{{ user_profile.phone_number }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">First Name:</span>
+            <span class="kyc-value">{{ user_profile.first_name }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Middle Name:</span>
+            <span class="kyc-value">{{ user_profile.middle_name }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Last Name:</span>
+            <span class="kyc-value">{{ user_profile.last_name }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Date of Birth:</span>
+            <span class="kyc-value">{{ user_profile.dob }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Citizenship Number:</span>
+            <span class="kyc-value">{{ kyc_registration.citizenship_number }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Voter ID:</span>
+            <span class="kyc-value">{{ kyc_registration.voter_id }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Public Address:</span>
+            <span class="kyc-value">{{ kyc_registration.publicaddress }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Gender:</span>
+            <span class="kyc-value">{{ kyc_registration.gender }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Country:</span>
+            <span class="kyc-value">{{ kyc_registration.country }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Province:</span>
+            <span class="kyc-value">{{ kyc_registration.province }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">District:</span>
+            <span class="kyc-value">{{ kyc_registration.district }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Municipality:</span>
+            <span class="kyc-value">{{ kyc_registration.municipality }}</span>
+        </div>
+        <div class="kyc-field">
+            <span class="kyc-label">Ward No:</span>
+            <span class="kyc-value">{{ kyc_registration.ward_no }}</span>
+        </div>
+        <div class="kyc-field zoom-container">
+            <span class="kyc-label">Voter ID Photo:</span>
+            <img src="{{ kyc_registration.photo_voter.url }}" alt="Voter ID Photo">
             <div class="zoom-overlay"></div>
         </div>
-        <div class="kyc-details">
-            <div class="kyc-field">
-                <span class="kyc-label">Email:</span>
-                <span class="kyc-value">{{ kyc_registration.email }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Phone Number:</span>
-                <span class="kyc-value">{{ user_profile.phone_number }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">First Name:</span>
-                <span class="kyc-value">{{ user_profile.first_name }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Middle Name:</span>
-                <span class="kyc-value">{{ user_profile.middle_name }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Last Name:</span>
-                <span class="kyc-value">{{ user_profile.last_name }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Date of Birth:</span>
-                <span class="kyc-value">{{ user_profile.dob }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Citizenship Number:</span>
-                <span class="kyc-value">{{ kyc_registration.citizenship_number }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Voter ID:</span>
-                <span class="kyc-value">{{ kyc_registration.voter_id }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Gender:</span>
-                <span class="kyc-value">{{ kyc_registration.gender }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Country:</span>
-                <span class="kyc-value">{{ kyc_registration.country }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Province:</span>
-                <span class="kyc-value">{{ kyc_registration.province }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">District:</span>
-                <span class="kyc-value">{{ kyc_registration.district }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Municipality:</span>
-                <span class="kyc-value">{{ kyc_registration.municipality }}</span>
-            </div>
-            <div class="kyc-field">
-                <span class="kyc-label">Ward No:</span>
-                <span class="kyc-value">{{ kyc_registration.ward_no }}</span>
-            </div>
-            <div class="kyc-field zoom-container">
-                <span class="kyc-label">Voter ID Photo:</span>
-                <img src="{{ kyc_registration.photo_voter.url }}" alt="Voter ID Photo">
-                <div class="zoom-overlay"></div>
-            </div>
-            <div class="kyc-field zoom-container">
-                <span class="kyc-label">Citizenship Photo Front:</span>
-                <img src="{{ kyc_registration.photo_citizenship_front.url }}" alt="Citizenship Photo Front">
-                <div class="zoom-overlay"></div>
-            </div>
-            <div class="kyc-field zoom-container">
-                <span class="kyc-label">Citizenship Photo Back:</span>
-                <img src="{{ kyc_registration.photo_citizenship_back.url }}" alt="Citizenship Photo Back">
-                <div class="zoom-overlay"></div>
-            </div>
-
-            <div class="kyc-actions">
-                <a href="{% url 'accept_kyc' request_id=kyc_request.id %}" class="kyc-button accept">Accept KYC</a>
-                <a href="{% url 'reject_kyc' request_id=kyc_request.id %}" class="kyc-button reject">Reject KYC</a>
-                <a class="kyc-button accept">Whitelisting User</a>
-            </div>
-
-
+        <div class="kyc-field zoom-container">
+            <span class="kyc-label">Citizenship Photo Front:</span>
+            <img src="{{ kyc_registration.photo_citizenship_front.url }}" alt="Citizenship Photo Front">
+            <div class="zoom-overlay"></div>
         </div>
+        <div class="kyc-field zoom-container">
+            <span class="kyc-label">Citizenship Photo Back:</span>
+            <img src="{{ kyc_registration.photo_citizenship_back.url }}" alt="Citizenship Photo Back">
+            <div class="zoom-overlay"></div>
+        </div>
+ <div class="kyc-actions">
+        <a href="javascript:void(0);" id="accept-kyc-btn" class="kyc-button accept">Accept KYC</a>
+        <a href="{% url 'reject_kyc' request_id=kyc_request.id %}" class="kyc-button reject">Reject KYC</a>
     </div>
-    </div>
+</div><script id="contract-abi" type="application/json">
+    {{ contract_abi_json|safe }}
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const contractAddress = "0x96283B521509b8409a33e51109B0Ef314b2d1B38";
+        const contractABI = JSON.parse(document.getElementById("contract-abi").textContent);
+        const descriptorHash = "{{ descriptor_hash|escapejs }}".startsWith("0x") ? "{{ descriptor_hash|escapejs }}" : "0x{{ descriptor_hash|escapejs }}";
+        const voterAddress = "{{ public_address|escapejs }}";
+        const uc = "{{ kyc_registration.district }}";
+        const acceptKycButton = document.getElementById("accept-kyc-btn");
+        const SEPOLIA_CHAIN_ID = "0xaa36a7";
+
+        if (!acceptKycButton) {
+            console.error("Accept KYC button not found.");
+            return;
+        }
+
+        // Attach click handler
+        acceptKycButton.addEventListener("click", async () => {
+            try {
+                if (!window.ethereum) {
+                    alert("MetaMask is not installed!");
+                    return;
+                }
+
+                // Basic validations
+                if (!voterAddress || voterAddress.toLowerCase() === "0x0000000000000000000000000000000000000000") {
+                    console.error("Invalid voter address:", voterAddress);
+                    alert("Invalid voter address! Check console for details.");
+                    return;
+                }
+
+                if (!/^0x[0-9a-fA-F]{40}$/.test(voterAddress)) {
+                    console.error("Invalid Ethereum address format:", voterAddress);
+                    alert("Invalid Ethereum address format!");
+                    return;
+                }
+
+                if (!uc) {
+                    alert("UC (Municipality) is missing.");
+                    return;
+                }
+
+                if (!descriptorHash || !/^0x[0-9a-fA-F]{64}$/.test(descriptorHash)) {
+                    console.error("Invalid descriptor hash:", descriptorHash);
+                    alert("Invalid descriptor hash (should be 0x + 64 hex chars).");
+                    return;
+                }
+
+                // Request MetaMask connection
+                const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+                const signerAddress = accounts[0];
+                console.log("MetaMask connected with:", signerAddress);
+
+                // Ensure Sepolia network
+                const currentNetwork = await ethereum.request({ method: "eth_chainId" });
+                if (currentNetwork !== SEPOLIA_CHAIN_ID) {
+                    try {
+                        await ethereum.request({
+                            method: "wallet_switchEthereumChain",
+                            params: [{ chainId: SEPOLIA_CHAIN_ID }],
+                        });
+                        console.log("Switched to Sepolia network");
+                    } catch (switchError) {
+                        console.error("Failed to switch network:", switchError);
+                        alert("Please switch to Sepolia network manually in MetaMask.");
+                        return;
+                    }
+                }
+
+                // Call contract
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                console.log("Calling acceptKycAndStoreFaceHash...");
+                const tx = await contract.acceptKycAndStoreFaceHash(
+                    voterAddress,
+                    descriptorHash,
+                    uc,
+                    {
+                        gasLimit: 150000
+                    }
+                );
+                console.log("Transaction sent:", tx.hash);
+
+                // Wait for confirmation
+                await tx.wait();
+                alert("✅ KYC approved and face hash stored on blockchain.");
+
+                // Redirect to Django view to mark KYC as approved
+                window.location.href = "{% url 'final_accept_kyc' request_id=kyc_request.id %}";
+
+            } catch (error) {
+                console.error("Blockchain transaction failed:", error);
+                alert("❌ Transaction failed: " + (error.message || "Check console for details."));
+            }
+        });
+    });
+</script>
 
 {% endblock %}

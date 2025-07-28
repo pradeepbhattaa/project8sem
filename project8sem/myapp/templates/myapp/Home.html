@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="{% static 'myapp/css/nav.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/footer.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+        <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js" type="application/javascript"></script>
+
 </head>
 <body>
          <!-- Display alert messages -->
@@ -36,6 +38,7 @@
                 <a href="{% url 'notices' %}">Notices</a>
                 <a href="{% url 'vote' %}">Vote Here</a>
                 <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+                <a href="{% url 'resultuser' %}">Results</a>
                 <a href="{% url 'contact' %}">Contact</a>
             </div>
             <div class="nav-right">
@@ -68,13 +71,39 @@
             <a href="{% url 'notices' %}">Notices</a>
             <a href="{% url 'vote' %}">Vote Here</a>
             <a href="{% url 'verify_kyc' %}">Verify KYC</a>
+            <a href="{% url 'resultuser' %}">Results</a>
             <a href="{% url 'contact' %}">Contact</a>
         </div>
     </div>
     
     <main>
+     
+
+
+
+
         
     <section class="welcome-section">
+         <div id="voting-banner-container" style="
+  position: fixed;
+  top: 0;
+  width: 100%;
+  
+  color: red;
+  padding: 8px 0;
+  overflow: hidden;
+  z-index: 9999;
+  font-size: 16px;
+">
+  <div id="voting-banner-text" style="
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll-banner 20s linear infinite;
+    padding-left: 100%;
+  ">
+    ⏳ Loading voting status...
+  </div>
+</div>
         <h1>Welcome to OVC</h1>
         <p>We provide a secure and transparent platform<br>for you to cast your vote online—fast.</p>
         <div class="vote-now">
@@ -103,18 +132,7 @@
         </div>
     </section>
 
-    <section class="stats-timer">
-        <div class="stats">
-            <h3>Live Voting Stats</h3>
-            <p><strong>5,120</strong><br>Registered Users</p>
-            <p><strong>3,245</strong><br>Votes Cast</p>
-        </div>
-        <div class="timer">
-            <h3>Time Left to Vote</h3>
-            <p><strong>3 Days 12 H 5 Minutes</strong></p>
-        </div>
-    </section>
-
+    
 
     </main>
     <footer class="footer">
@@ -160,6 +178,611 @@
     <script src="{% static 'myapp/js/profiledropdown.js' %}"></script>
     <script src="{% static 'myapp/js/navs.js' %}"></script>
     <script src="{%static 'myapp/js/alert.js' %}"> </script>
+   <script>
+async function setupVotingBanner() {
+  const bannerText = document.getElementById("voting-banner-text");
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+  const contractAddress = "0x96283B521509b8409a33e51109B0Ef314b2d1B38";
+			const contractABI =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+ 
+const contract = new ethers.Contract(
+      contractAddress,contractABI,
+      await provider.getSigner()
+    );
+
+    const start = Number(await contract.startTime());
+    const end = Number(await contract.endTime());
+
+    function formatDuration(seconds) {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.ceil((seconds % 3600) / 60);
+
+      let parts = [];
+      if (days > 0) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+      if (hours > 0) parts.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
+      if (minutes > 0 && days === 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
+
+      return parts.join(' ');
+    }
+
+    function updateBanner() {
+      const now = Math.floor(Date.now() / 1000);
+
+      if (now < start) {
+        const remaining = start - now;
+        bannerText.innerText = `🕓 Voting will start in ${formatDuration(remaining)}. Get ready!`;
+      } else if (now >= start && now <= end) {
+        const remaining = end - now;
+        bannerText.innerText = `🗳️ Voting is live! Ends in ${formatDuration(remaining)}. Cast your vote now!`;
+      } else {
+        const since = now - end;
+        bannerText.innerText = `✅ Voting ended ${formatDuration(since)} ago. Thank you for participating!`;
+      }
+    }
+
+    updateBanner();
+    setInterval(updateBanner, 60000); // update every minute
+  } catch (err) {
+    console.error("Voting banner error:", err);
+    bannerText.innerText = "⚠️ Unable to load voting status. Please try again.";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", setupVotingBanner);
+</script>
+
+
     
 </body>
 </html>

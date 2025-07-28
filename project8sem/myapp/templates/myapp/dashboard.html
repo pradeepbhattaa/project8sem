@@ -1,133 +1,731 @@
+<!-- myapp/templates/myapp/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Dashboard{% endblock %}</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'myapp/css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
-    <link rel="stylesheet" href="{% static 'myapp/css/main-content.css' %}">
-    {% block head %}{% endblock %}
-</head>
-<body>
 
-<!-- Display alert messages -->
-{% if messages %}
-<div id="message-container">
-    {% for message in messages %}
-    <div class="alert {{ message.tags }}">
-        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-        {{ message }}
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Admin Dashboard{% endblock %}</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'myapp/css/dashboard.css' %}">
+        <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
+        <link rel="stylesheet" href="{% static 'myapp/css/main-content.css' %}">
+        {% block head %}{% endblock %}
+    </head>
 
-<div class="header">
-    <div class="logo">
-       <p> logo </p>
-    </div>
-    <div class="title-header">
-        <h1 class="admin-header">Admin Dashboard</h1>
-    </div>
-</div>
+    <body>
 
-<div class="container">
-    <div class="sidebar">
-        <ul class="nav-links">
-            <li> <a href="{% url 'base'%}"> Home  </a></li>
-            <li>
-                <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
-                <ul id="user-submenu" class="submenu">
-                    <li><a href="{% url 'adduser' %}">Add User</a></li>
-                    <li><a href="{% url 'edituser' %}">Edit User</a></li>
-                    
-                    <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
-                    <li><a href="{% url 'view_users' %}">View Users</a></li>
-                    
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
-                <ul id="notice-submenu" class="submenu">
-                    <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
-                    <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
-                    <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
-                    <li><a href="{% url 'view_notices' %}">View Notices</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
-                <ul id="candidate-submenu" class="submenu">
-                    <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
-                    <li><a href="{% url 'editcandidate' %}">Edit Candidate</a></li>
-                    <li><a href="{% url 'deletecandidate' %}">Delete Candidate</a></li>
-                    <li><a href="{% url 'viewcandidate' %}">View Candidates</a></li>
-                    <li><a href="{% url 'viewall_candidate' %}">View All  Candidates</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
-                <ul id="kyc-submenu" class="submenu">
-                    <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
-                    <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
-                    <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
-
-                </ul>
-            </li>
-            
-
-            <li><a href="{% url 'adminlogout' %}">Logout</a></li>
-            <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
-        </ul>
-    </div>
-
-    <div class="main-content">
-
-        <div class="count-number">
-            <div class="count-items">
-                <h4>Total Users: {{ total_users }}</h4>
+        <!-- Display alert messages -->
+        {% if messages %}
+        <div id="message-container">
+            {% for message in messages %}
+            <div class="alert {{ message.tags }}">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                {{ message }}
             </div>
-            <div class="count-items">
-                <h4>Total Candidates: {{ total_candidates }}</h4>
-            </div>
-            <div class="count-items">
-                <a href="{% url 'view_kycrequest' %}"<h4>KYC Requests: {{ kyc_requests }}</h4></a>
-            </div>
-            <div class="count-items">
-                <h4>KYC Verified: {{ kyc_verified }}</h4>
-            </div>
-
-            <div class="count-items">
-                <a href=""><h4>Start Voting</h4></a>
-            </div>
-            <div class="count-items">
-
-                <a href=""><h4>End Voting</h4></a>
-                
-            </div>
-        </div>
-
-        <!-- Conditional rendering for the graph -->
-        {% if graph %}
-        <div class="graph-container">
-            <img src="data:image/png;base64,{{ graph }}" alt="User Age Distribution Graph">
-        </div>
-        {% else %}
-        <div class="graph-container">
-            <p>No graph available</p>
+            {% endfor %}
         </div>
         {% endif %}
 
-    </div>
-</div>
+        <div class="header">
+            <div class="logo">
+                <p> logo </p>
+            </div>
+            <div class="title-header">
+                <h1 class="admin-header">Admin Dashboard</h1>
+            </div>
+        </div>
 
-{% block adduserjs %}
-{% endblock %}
+        <div class="container">
+            <div class="sidebar">
+                <ul class="nav-links">
+                    <li> <a href="{% url 'dashboard'%}"> Home </a></li>
+                    <li>
+                        <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
+                        <ul id="user-submenu" class="submenu">
+                            <li><a href="{% url 'adduser' %}">Add User</a></li>
+                            <li><a href="{% url 'edituser' %}">Edit User</a></li>
 
-<script src="{% static 'myapp/js/dashboard.js' %}"></script>
-<script src="{% static 'myapp/js/alert.js' %}"></script>
-</body>
+                            <li><a href="{% url 'deleteuser' %}">Delete User</a></li>
+                            <li><a href="{% url 'view_users' %}">View Users</a></li>
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" onclick="toggleSubmenu('notice-submenu')">Notice Management</a>
+                        <ul id="notice-submenu" class="submenu">
+                            <li><a href="{% url 'add_notices' %}">Add Notice</a></li>
+                            <li><a href="{% url 'editnotices' %}">Edit Notice</a></li>
+                            <li><a href="{% url 'deletenotices' %}">Delete Notice</a></li>
+                            <li><a href="{% url 'view_notices' %}">View Notices</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" onclick="toggleSubmenu('candidate-submenu')">Candidate Management</a>
+                        <ul id="candidate-submenu" class="submenu">
+                            <li><a href="{% url 'addcandidate' %}">Add Candidate</a></li>
+                            
+                            
+                            <li><a href="{% url 'viewall_candidate' %}">View All Candidates</a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a href="#" onclick="toggleSubmenu('kyc-submenu')">KYC</a>
+                        <ul id="kyc-submenu" class="submenu">
+                            <li><a href="{% url 'view_kycrequest' %}">KYC requests</a></li>
+                            <li><a href="{% url 'view_verifiedkyc' %}">Verified KYC </a></li>
+                            <li><a href="{% url 'view_rejectedkyc' %}">Rejected KYC </a></li>
+
+                        </ul>
+                    </li>
+
+                    <li><a href="{% url 'view_otp' %}"> View Otp Details</a></li>
+                    <li><a href="{% url 'resultadmin' %}"> Results</a></li>
+                    <li><a href="{% url 'adminlogout' %}">Logout</a></li>
+                    
+                    
+                </ul>
+            </div>
+
+            <div class="main-content">
+
+                <div class="count-number">
+                    <div class="count-items">
+                        <h4>Total Users: {{ total_users }}</h4>
+                    </div>
+                    <div class="count-items">
+                        <h4>Total Candidates: {{ total_candidates }}</h4>
+                    </div>
+                    <div class="count-items">
+                        <h4>KYC Requests: {{ kyc_requests }}</h4>
+                    </div>
+                    <div class="count-items">
+                        <h4>KYC Verified: {{ kyc_verified }}</h4>
+                    </div>
+                    <div class="count-items">
+                       
+						<label>Start Time:</label>
+						<input type="datetime-local" id="startTime" required>
+						<label>End Time:</label>
+						<input type="datetime-local" id="endTime" required>
+						<button onclick="setSchedule()">Set Schedule</button>
+
+                    </div>
+                    
+                </div>
+
+            
+
+                </div>
+
+
+
+
+            </div>
+			
+        </div>
+		
+
+        {% block adduserjs %}
+        {% endblock %}
+
+        <script src="{% static 'myapp/js/dashboard.js' %}"></script>
+        <script src="{% static 'myapp/js/alert.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js"></script>
+
+<script>
+ const contractAddress = "0x96283B521509b8409a33e51109B0Ef314b2d1B38";
+const contractABI =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+ async function setSchedule() {
+    try {
+      const startInput = document.getElementById("startTime").value;
+      const endInput = document.getElementById("endTime").value;
+
+      if (!startInput || !endInput) {
+        alert("Please select both start and end date-times.");
+        return;
+      }
+
+      // Convert to UTC Unix timestamps
+      const startUTC = Math.floor(new Date(startInput).getTime() / 1000);
+      const endUTC = Math.floor(new Date(endInput).getTime() / 1000);
+
+      if (startUTC >= endUTC) {
+        alert("Start time must be before end time.");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+      const tx = await contract.setVotingSchedule(startUTC, endUTC);
+      alert("Transaction submitted! Waiting for confirmation...");
+      await tx.wait();
+      alert("✅ Voting schedule set successfully!");
+    } catch (error) {
+      
+      alert("Failed to set voting schedule.");
+    }
+  }
+ 
+
+</script>
+
+
+
+       
+    </body>
+
 </html>

@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="{% static 'myapp/css/kkyc.css' %}">
     <link rel="stylesheet" href="{% static 'myapp/css/alert.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js" type="application/javascript"></script>
+
+
 </head>
 <body>
 
@@ -33,45 +36,48 @@
             <div class="logo"><img src="{% static 'myapp/images/logo.jpg' %}" alt="Logo" class="circular-logo"></div>
         </div>
         <div class="nav-center" id="navLinks">
-            <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'candidates' %}">Candidates</a>
-            <a href="{% url 'notices' %}">Notices</a>
-            <a href="{% url 'vote' %}">Vote Here</a>
-            <a href="{% url 'verify_kyc' %}">Verify KYC</a>
-            <a href="{% url 'contact' %}">Contact</a>
-        </div>
-        <div class="nav-right">
-            {% if user_full_name %}
-                <span class="user-full-name">{{ user_full_name }}</span>
-                {% if user_profile_picture %}
-                    <img src="{{ user_profile_picture.photo_front.url }}" alt="Profile Picture" class="profiles-picture" onclick="toggleDropdown()">
-                {% else %}
-                <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture" onclick="toggleDropdown()">
-                {% endif %}
-                <div class="dropdown-menu" id="dropdownMenu">
-                    <a href="{% url 'edit_profile' %}" class="profile-items">Edit Profile</a>
-                    <a href="{% url 'user_logout' %}" class="profile-items">Logout</a>
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'candidates' %}">Candidates</a>
+                    <a href="{% url 'notices' %}">Notices</a>
+                    <a href="{% url 'vote' %}">Vote Here</a>
+                    <a href="{% url 'resultuser' %}">Results</a>
+                    <a href="{% url 'contact' %}">Contact</a>
                 </div>
-            {% else %}
-                <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
-            {% endif %}
-        </div>
-    </nav>
-</header>
+                <div class="nav-right">
+                    {% if user_full_name %}
+                    <span class="user-full-name">{{ user_full_name }}</span>
+                    {% if user_profile_picture %}
+                    <img src="{{ user_profile_picture }}" alt="Profile Picture" class="profiles-picture"
+                        onclick="toggleDropdown()">
+                    {% else %}
+                    <img src="{% static 'myapp/images/user_icon.png' %}" alt="Profiles Picture" class="profiles-picture"
+                        onclick="toggleDropdown()">
+                    {% endif %}
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="{% url 'edit_profile' %}">Edit Profile</a>
+                        <a href="{% url 'user_logout' %}">Logout</a>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'userlogin' %}" class="login-button">LogIn</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
 
-<div class="side-menu" id="sideMenu">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-    <div id="sideNavLinks">
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'candidates' %}">Candidates</a>
-        <a href="{% url 'notices' %}">Notices</a>
-        <a href="{% url 'vote' %}">Vote Here</a>
-        <a href="{% url 'verify_kyc' %}">Verify KYC</a>
-        <a href="{% url 'contact' %}">Contact</a>
-    </div>
-</div>
+        <div class="side-menu" id="sideMenu">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <div id="sideNavLinks">
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'candidates' %}">Candidates</a>
+                <a href="{% url 'notices' %}">Notices</a>
+                <a href="{% url 'vote' %}">Vote Here</a>
+                <a href="{% url 'resultuser' %}">Results</a>
+                <a href="{% url 'contact' %}">Contact</a>
+            </div>
+        </div>
 
 <div class="container">
+    <p id="kyc-locked-message" style="color:red; font-weight: bold;"></p>
     <form id="register-form" action="{% url 'verify_kyc' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="sectiondiv show" id="section-1">
@@ -140,6 +146,14 @@
                     </div>
                     <input type="text" id="voter_id" name="voter_id">
                 </div>
+                <div class="input-box">
+                                <div class="errorlabel">
+                                    <label for="voter_id">Public Address:</label>
+                                    <span class="error-message" id="voter-error"></span>
+
+                                </div>
+                                <input type="text" id="" name="publicaddress">
+                            </div>
                 <div class="gender-container">
                     <label>Gender:</label>
                     <div class="genderradio">
@@ -264,7 +278,580 @@
 <script src="{% static 'myapp/js/navs.js' %}"></script>
 <script src="{% static 'myapp/js/profilesdropdown.js' %}"></script>
 <script>
+    
     document.addEventListener('DOMContentLoaded', async () => {
+         const provider = new ethers.BrowserProvider(window.ethereum);
+       
+		
+		 const contractAddress = "0x96283B521509b8409a33e51109B0Ef314b2d1B38";
+		const contractABI =[
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_voterAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "_descriptorHash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			}
+		],
+		"name": "acceptKycAndStoreFaceHash",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "_category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "_uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_candidate",
+				"type": "address"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "faceHash",
+				"type": "bytes32"
+			}
+		],
+		"name": "KYCAcceptedAndDataStored",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "manager",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ManageMange",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_manager",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "managerManage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "setVotingSchedule",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnerShip",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_newOwner",
+				"type": "address"
+			}
+		],
+		"name": "TransferOwneship",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "_candidateIds",
+				"type": "address[]"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address[]",
+				"name": "votes",
+				"type": "address[]"
+			}
+		],
+		"name": "Voted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "VotingScheduleSet",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "candidateCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "category",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "candidate",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidatesAdd",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "endTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "faceHashes",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_candidateId",
+				"type": "address"
+			}
+		],
+		"name": "getCandidate",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "enum AdvancedVoting.Category",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"name": "getFaceHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "results",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isCandidate",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "isManager",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isVotingFinalized",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "scheduleSet",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "startTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasVoted",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "isWhitelisted",
+				"type": "bool"
+			},
+			{
+				"internalType": "string",
+				"name": "uc",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "voter",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+ 
+		const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+        try {
+            const startTime = await contract.startTime();
+            const now = Math.floor(Date.now() / 1000);  // current timestamp in seconds
+
+         if (now >= Number(startTime)) {
+                      // Hide form and show message
+             const form = document.getElementById("register-form");
+             const message = document.getElementById("kyc-locked-message");
+
+             if (form) form.style.display = "none";
+                 if (message) message.innerText = "Voting has already started. KYC submission is no longer allowed.";
+             }
+  } catch (err) {
+    console.error("Error fetching voting start time:", err);
+  }
             try {
                 const modelsLoaded = await loadFaceApiModels();
                 if (!modelsLoaded) {

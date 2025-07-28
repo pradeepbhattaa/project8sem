@@ -138,6 +138,14 @@ urlpatterns = [
 
                        path('user_logout/',views.user_logout,name="user_logout"),
                        path('verify_face/', views.verify_face, name='verify_face'),
+                        path('resultuser/',views.resultuser,name="resultuser"),
+
+                       path('resultadmin/',views.resultadmin,name="resultadmin"),
+                       path('accept_kyc_final/<int:request_id>/', views.final_accept_kyc, name='final_accept_kyc'),
+                        path('get_candidate_addresses/', views.get_candidate_addresses, name='get_candidate_addresses'),
+
+                      path('get_candidate_info/', views.get_candidate_info, name='get_candidate_info'),
+
 
 
 

@@ -37,7 +37,7 @@
     <div class="container">
         <div class="sidebar">
             <ul class="nav-links">
-                <li> <a href="{% url 'base'%}"> Home  </a></li>
+                <li> <a href="{% url 'dashboard'%}"> Home  </a></li>
                 <li>
                     <a href="#" onclick="toggleSubmenu('user-submenu')">User Management</a>
                     <ul id="user-submenu" class="submenu">
@@ -84,10 +84,86 @@
                 <li><a href="{% url 'view_otp' %}"> OTP for Reset </a></li>
             </ul>
         </div>
-
-        <div class="main-content">
-
             {% block content %}
+        <div class="main-content">
+             <div class="user-analysis-container">
+
+                    <h1>User Analysis Graph </h1>
+
+
+                    <div class="candidate-graph">
+
+
+
+                        {% if user_age_graph %}
+                        <div class="graph-container">
+                            <img src="data:image/jpg;base64,{{ user_age_graph }}" alt="User Age Graph">
+                        </div>
+                        {% else %}
+                        <div class="graph-container">
+                            <p>No graph available</p>
+                        </div>
+                        {% endif %}
+
+                        {% if user_province_piechart %}
+                        <div class="graph-container">
+                            <img src="data:image/jpg;base64,{{ user_province_piechart}}" alt="User Province Piechart">
+                        </div>
+                        {% else %}
+                        <div class="graph-container">
+                            <p>No graph available</p>
+                        </div>
+                        {% endif %}
+
+                        {% if user_gender_piechart %}
+                        <div class="graph-container">
+                            <img src="data:image/jpg;base64,{{ user_gender_piechart}}" alt="User Gender Piechart">
+                        </div>
+                        {% else %}
+                        <div class="graph-container">
+                            <p>No graph available</p>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+
+                </div>
+
+                <div class="candidate-analysis-container">
+
+                    <h1> Candidate Analysis Graph </h1>
+
+                    <div class="candidate-graph">
+
+                        {% if graph %}
+                        <div class="graph-container">
+                            <img src="data:image/jpg;base64,{{ graph }}" alt="Candidates by Political Party">
+                        </div>
+                        {% else %}
+                        <div class="graph-container">
+                            <p>No graph available</p>
+                        </div>
+                        {% endif %}
+
+                        {% if candidate_age_graph %}
+                        <div class="graph-container">
+                            <img src="data:image/jpg;base64,{{ candidate_age_graph }}" alt="Candidates by Ages">
+
+                        </div>
+                        {% else %}
+                        <div class="graph-container">
+                            <p>No graph available</p>
+                        </div>
+                        {% endif %}
+
+
+                    </div>
+
+
+
+
+            
             {% endblock %}
         </div>
     </div>
